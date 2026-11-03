@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>좌석배치표</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;user-select:none;-webkit-user-select:none}
+/* 1920x900 (크롬 상단 탭/주소창/북마크바를 뺀 1920x1080 모니터 가시영역) 기준 고정 스테이지, 창 크기에 맞춰 자동 축소/확대 */
+#stage{position:absolute;left:0;top:0;width:1920px;height:900px;transform-origin:0 0;background:#f4f6fa;overflow:hidden}
+#hdr{position:absolute;left:0;top:0;width:1920px;height:80px;background:#1f2a44;color:#fff;display:flex;align-items:center;padding:0 40px}
+#hdr h1{font-size:36px;letter-spacing:2px}
+
+
+/* 첫 화면 */
+#setup{position:absolute;left:0;top:80px;width:1920px;height:820px}
+.card{position:absolute;left:580px;top:80px;width:760px;background:#fff;border-radius:20px;box-shadow:0 10px 40px rgba(20,30,60,.15);padding:50px 60px}
+.card label{display:block;font-size:20px;font-weight:700;color:#334;margin:0 0 10px}
+.card input{width:100%;height:60px;font-size:24px;padding:0 18px;border:2px solid #c9d1de;border-radius:12px;outline:none;margin-bottom:30px;font-family:inherit}
+.card input:focus{border-color:#3b82f6}
+.places{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.places button{height:90px;font-size:24px;font-weight:700;border-radius:14px;border:2px solid #c9d1de;background:#f1f4f9;color:#99a;cursor:not-allowed;font-family:inherit;position:relative}
+.places button small{display:block;font-size:14px;font-weight:400;margin-top:4px}
+.places button.on{background:#2563eb;border-color:#1d4ed8;color:#fff;cursor:pointer}
+.places button.on:hover{background:#1d4ed8}
+
+/* 좌석 화면 */
+#hallScreen{position:absolute;left:0;top:0;width:1920px;height:900px;display:none}
+#panel{position:absolute;left:30px;top:16px;width:230px;height:868px;display:flex;flex-direction:column;gap:8px}
+#roomTitle{white-space:pre-line;background:#1f2a44;color:#fff;border-radius:12px;padding:14px 16px;font-size:24px;font-weight:800;line-height:1.3;letter-spacing:1px}
+#back{width:107px;height:36px;border:0;border-radius:8px;background:#3b4a6b;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:6px}
+#back:hover{background:#4a5b82}
+#orgInfo{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 2px 8px rgba(20,30,60,.12);border-left:6px solid #1f2a44}
+#orgInfo .k{font-size:13px;color:#778;margin-top:8px}
+#orgInfo .k:first-child{margin-top:0}
+#orgInfo .v{font-size:22px;font-weight:800;color:#111;word-break:break-all;line-height:1.25}
+#botbox{margin-top:auto;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+#panel h3{font-size:18px;color:#334}
+#help{width:100%;font-size:12px;color:#667;line-height:1.55;margin-top:2px}
+#help b{color:#334}
+#gbox{display:grid;grid-template-rows:repeat(4,50px);grid-auto-flow:column;grid-auto-columns:50px;gap:7px}
+.gb{width:50px;height:50px;border:0;border-radius:10px;font-size:24px;font-weight:800;color:#fff;cursor:pointer;font-family:inherit;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:transform .08s}
+.gb:hover{transform:scale(1.08)}
+.gb.act{outline:4px solid #111;outline-offset:2px;transform:scale(1.08)}
+.gb .ck{position:absolute;right:3px;top:1px;font-size:12px;display:none}
+.gb.has .ck{display:block}
+#done,#addBtn,#resetBtn{width:50px;height:50px;border:0;border-radius:10px;color:#fff;font-size:14px;line-height:1.2;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.2);padding:0}
+#done{margin-top:10px;width:107px;background:#111827;font-size:18px}
+#done:hover{background:#000}
+#row2{display:flex;gap:7px}
+#addBtn{background:#2e7d32}
+#addBtn:hover{background:#1b5e20}
+#addBtn.act{outline:4px solid #111;outline-offset:2px}
+#resetBtn{background:#b71c1c}
+#resetBtn:hover{background:#7f0000}
+#hall{position:absolute;left:276px;top:26px;width:1560px;height:808px;cursor:crosshair;transform:scale(1.05);transform-origin:0 0}
+#hall svg{position:absolute;left:0;top:0}
+#marq{position:absolute;display:none;border:2px dashed #111;background:rgba(0,0,0,.08);pointer-events:none;z-index:5}
+/* 팀명·인원 창 (기본 크기는 의자 58px 기준, 방마다 --k 비율로 맞춤) */
+.lbl{position:absolute;background:#fff;border:4px solid #333;border-radius:14px;transform:translate(-50%,-50%) scale(var(--k,1));z-index:6;box-shadow:0 3px 10px rgba(0,0,0,.25);cursor:default;overflow:hidden;display:flex;text-align:center}
+.lbl input{min-width:0;border:0;background:transparent;font-family:inherit;font-weight:800;color:#111;outline:none;text-align:center;user-select:text;-webkit-user-select:text;padding:0 6px}
+.lbl input::placeholder{color:#bbb;font-weight:400}
+.lbl input[type=number]::-webkit-inner-spin-button,.lbl input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.lbl input[type=number]{-moz-appearance:textfield}
+.lbl .u{font-weight:800;color:#111}
+.lbl .cap{font-weight:700;line-height:1;color:#556;background:#e8ecf3;padding:5px 9px;border-radius:12px}
+.lbl .hd,.lbl .r2{display:flex;align-items:center}
+.lbl .hd input{width:100%;height:100%}
+/* 두 줄: 가로 300 x 세로 의자 2줄(130px) */
+.lbl.two{width:300px;height:130px;flex-direction:column}
+.lbl.two .hd{flex:1 1 0;min-height:0;border-bottom:2px solid #e3e8f0}
+.lbl.two .hd input{font-size:40px}
+.lbl.two .r2{flex:0 0 54px;justify-content:center;gap:8px}
+.lbl.two .tc{width:110px;height:46px;font-size:30px}
+.lbl.two .u{font-size:26px}
+.lbl.two .cap{font-size:14px}
+/* 한 줄: 가로 380 x 세로 의자 1줄(58px) */
+.lbl.one{width:380px;height:58px;flex-direction:row}
+.lbl.one .hd{flex:1 1 0;min-width:0;height:100%;border-right:2px solid #e3e8f0}
+.lbl.one .hd input{font-size:30px}
+.lbl.one .r2{flex:0 0 auto;gap:4px;padding:0 8px}
+.lbl.one .tc{width:84px;height:40px;font-size:24px}
+.lbl.one .u{font-size:22px}
+.lbl.one .cap{display:none}
+#modal{position:absolute;left:0;top:0;width:1920px;height:900px;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:100}
+#modal .box{background:#fff;border-radius:16px;padding:32px 36px;width:560px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#modal p{font-size:22px;line-height:1.55;color:#222;margin-bottom:26px;white-space:pre-line}
+#modal .btns{display:flex;gap:12px;justify-content:flex-end}
+#modal button{height:48px;padding:0 28px;border:0;border-radius:10px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit}
+#mOk{background:#b71c1c;color:#fff}
+#mNo{background:#e5e9f0;color:#333}
+#tip{position:fixed;display:none;z-index:9999;background:#111;color:#fff;font-size:16px;font-weight:700;padding:4px 10px;border-radius:14px;pointer-events:none;white-space:nowrap}
+#toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(17,24,39,.9);color:#fff;padding:10px 22px;border-radius:24px;font-size:18px;display:none;z-index:20}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="hdr">
+    <h1>좌석배치표</h1>
+  </div>
+
+  <!-- 첫 화면 -->
+  <div id="setup">
+    <div class="card">
+      <label for="orgName">단체명</label>
+      <input id="orgName" type="text" placeholder="단체명을 입력하세요" autocomplete="off">
+      <label for="orgCount">인원수</label>
+      <input id="orgCount" type="number" min="0" placeholder="총 인원수를 입력하세요">
+      <label>장소 선택</label>
+      <div class="places">
+        <button class="on" data-place="media">멀티미디어 영상관</button>
+        <button class="on" data-place="seminar">세미나실</button>
+        <button class="on" data-place="team">팀미팅룸</button>
+        <button disabled>소세미나실<small>추후 추가 예정</small></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 좌석 화면 (멀티미디어 영상관 / 세미나실 공용) -->
+  <div id="hallScreen">
+    <div id="panel">
+      <div id="roomTitle"></div>
+      <div id="orgInfo">
+        <div class="k">단체명</div><div class="v" id="vName">-</div>
+        <div class="k">인원수</div><div class="v" id="vCount">0명</div>
+      </div>
+      <div id="botbox">
+        <button id="back">← 처음으로</button>
+        <h3>구역</h3>
+        <div id="gbox"></div>
+      </div>
+    </div>
+    <div id="hall">
+      <div id="marq"></div>
+    </div>
+    <div id="toast"></div>
+  </div>
+
+  <!-- 확인창 -->
+  <div id="modal">
+    <div class="box">
+      <p id="mMsg"></p>
+      <div class="btns"><button id="mNo">취소</button><button id="mOk">초기화</button></div>
+    </div>
+  </div>
+</div>
+<div id="tip"></div>
+
+<script>
+(function(){
+  /* ---------- 화면 맞춤 ---------- */
+  var stage=document.getElementById('stage'), scale=1;
+  function fit(){
+    scale=Math.min(window.innerWidth/1920, window.innerHeight/900);
+    var ox=(window.innerWidth-1920*scale)/2, oy=(window.innerHeight-900*scale)/2;
+    stage.style.transform='translate('+ox+'px,'+oy+'px) scale('+scale+')';
+  }
+  window.addEventListener('resize',fit); fit();
+
+  /* ---------- 공통 상수 ---------- */
+  var W=1560, H=808, CX=W/2;
+  var RED='#e5484d', BLUE='#3b82f6', GRAY='#9aa3b2', BLACK='#1a1a1a', DESK='#a1887f';
+  var COLORS=['','#ff9800','#00b85c','#9c27b0','#ff3d8b','#00bcd4','#c6d800','#795548','#607d8b'];
+  var TXT=['','#fff','#fff','#fff','#fff','#fff','#222','#fff','#fff'];
+  var NAMES=['','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ'];
+  var NS='http://www.w3.org/2000/svg';
+
+  /* ---------- SVG 도우미 ---------- */
+  var hall=document.getElementById('hall'), marq=document.getElementById('marq');
+  var svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  hall.insertBefore(svg,marq);
+  function el(name,attrs,parent){
+    var e=document.createElementNS(NS,name);
+    for(var k in attrs) e.setAttribute(k,attrs[k]);
+    if(parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(x,y,str,attrs){
+    attrs=attrs||{}; attrs.x=x; attrs.y=y; attrs['text-anchor']=attrs['text-anchor']||'middle';
+    var t=el('text',attrs,svg); t.textContent=str; return t;
+  }
+
+  /* ---------- 현재 방 상태 ---------- */
+  var cfg=null, current=null;
+  var S,CWd,CG,SG,RG,AW,ROW_TOP,PER,SW,SP,RP;     // S=의자 세로, CWd=의자 가로     // 의자 크기/간격 (방마다 다름)
+  var defs,gSlots,gOut;
+  var slots={}, slotList=[], seatList=[], rowTexts={};
+  var groups={};          // n -> {seats:Set, label:{el}}
+  var active=0, pending=new Set(), addMode=false;
+
+  function slotAt(row,side,k){ return slots['r'+row+side+k]; }
+  function setSlotType(sl,t){ sl.type=t; sl.chairs.forEach(function(c){ c.type=t; }); }
+
+
+  /* 의자 2개 + 책상 1개 세트 방(세미나실·팀미팅룸) 공용 장식. screenLeft=true면 스크린을 왼쪽 사선으로 */
+  function pairRoomDecor(screenLeft){
+    return function(){
+      // 무대 (정면)
+      el('rect',{x:CX-300,y:12,width:600,height:30,rx:4,fill:'#2f5d3a',stroke:'#8d6e63','stroke-width':4},svg);
+      txt(CX,34,'무대',{fill:'#fff','font-size':18,'font-weight':700,'letter-spacing':6});
+      // 스크린 (한쪽 옆, 살짝 대각선)
+      var sxc=screenLeft? W-1450 : 1450;
+      var g=el('g',{transform:'rotate('+(screenLeft?-24:24)+' '+sxc+' 52)'},svg);
+      el('rect',{x:sxc-85,y:44,width:170,height:16,rx:3,fill:'#f5f5f5',stroke:'#555','stroke-width':2},g);
+      var st=el('text',{x:sxc,y:56,'text-anchor':'middle',fill:'#333','font-size':12,'font-weight':700},g); st.textContent='스크린';
+      // 출입구: 중앙 복도에서 의자 2칸 만큼 오른쪽, 맨 뒤(하단)
+      var ey=H-56, dc=CX+2*CWd+CG, ex=dc-75;
+      el('rect',{x:ex,y:ey,width:150,height:44,rx:8,fill:'#2e7d32'},svg);
+      txt(ex+75,ey+29,'출입구',{fill:'#fff','font-size':22,'font-weight':700});
+      // 범례 (스크린과 겹치지 않는 쪽)
+      var lx=screenLeft? W-270 : 30;
+      el('rect',{x:lx,y:20,width:20,height:20,rx:5,fill:GRAY},svg);
+      txt(lx+28,36,'의자 (2개 + 책상)',{fill:'#444','font-size':16,'text-anchor':'start'});
+      el('rect',{x:lx,y:54,width:20,height:7,rx:3,fill:DESK},svg);
+      txt(lx+28,62,'책상 (선택 불가)',{fill:'#444','font-size':16,'text-anchor':'start'});
+    };
+  }
+
+  /* ---------- 방 설정 ---------- */
+  var ROOMS={
+    /* ===== 멀티미디어 영상관: 의자 1개 = 1칸 ===== */
+    media:{
+      name:'멀티미디어 영상관', title:'영상관\n좌석 배치', per:1, S:58, CG:0, SG:14, RG:14, AW:100, ROW_TOP:108,
+      nRows:9, maxK:9, k:1, exin:7.5, eyin:7.5, desk:false, rowFont:18,
+      rows:[[7,7],[8,8],[9,9],[9,9],[9,9],[8,8],[7,7],[7,4]],   // 열별 [왼쪽, 오른쪽] 고정 의자 수
+      rightBlank:{8:2},                                          // 8열 오른쪽 통로 쪽 장애인석 2칸 비움
+      color:function(c){ return c.type==='black'?BLACK:(c.row<=4?RED:BLUE); },
+      ghost:function(s){
+        if(s.row===8 && s.side==='R' && s.k<2) return true;      // 장애인석으로 비운 자리
+        if(s.row===9){                                           // 8열 뒤: 왼쪽 7칸 + 장애인석 아래 2칸
+          if(s.side==='L' && s.k<7) return true;
+          if(s.side==='R' && s.k<2) return true;
+        }
+        if(s.k>0){ var p=slotAt(s.row,s.side,s.k-1); if(p && p.type) return true; }   // 열의 바깥쪽 옆자리
+        return false;
+      },
+      canDelete:function(){ return true; },
+      addMsg:'점선 자리를 클릭하면 검정 의자 추가, 검정 의자를 클릭하면 삭제됩니다',
+      helpAdd:'점선 자리 클릭 → 검정 의자 추가,<br>검정 의자 클릭 → 삭제',
+      decor:function(){
+        // 스크린 / 무대
+        el('rect',{x:CX-430,y:12,width:860,height:28,rx:6,fill:'#222'},svg);
+        txt(CX,33,'SCREEN',{fill:'#fff','font-size':20,'font-weight':700,'letter-spacing':8});
+        el('rect',{x:CX-540,y:46,width:1080,height:50,rx:10,fill:'#d8c7a0',stroke:'#b8a57c','stroke-width':2},svg);
+        txt(CX,79,'무  대',{fill:'#5b4a22','font-size':24,'font-weight':700,'letter-spacing':6});
+        // 출입구: 오른쪽 좌석 구역 중앙, 맨 뒤(하단) + 비상구 표지판
+        var ey=H-56, rbCenter=(CX+AW/2 + CX+AW/2+9*72+58)/2, ex=rbCenter-111;
+        el('rect',{x:ex,y:ey,width:150,height:44,rx:8,fill:'#2e7d32'},svg);
+        txt(ex+75,ey+29,'출입구',{fill:'#fff','font-size':22,'font-weight':700});
+        var sx=ex+158;
+        el('rect',{x:sx,y:ey,width:64,height:44,rx:6,fill:'#0a8f3c',stroke:'#fff','stroke-width':2},svg);
+        el('circle',{cx:sx+24,cy:ey+8,r:3.8,fill:'#fff'},svg);
+        el('path',{d:'M'+(sx+22)+' '+(ey+13)+' L'+(sx+18)+' '+(ey+22)+' M'+(sx+19)+' '+(ey+15)+' L'+(sx+11)+' '+(ey+19)+' M'+(sx+21)+' '+(ey+14)+' L'+(sx+29)+' '+(ey+11)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+11)+' '+(ey+30)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+25)+' '+(ey+28)+' L'+(sx+23)+' '+(ey+33),stroke:'#fff','stroke-width':2.4,'stroke-linecap':'round','stroke-linejoin':'round',fill:'none'},svg);
+        el('rect',{x:sx+41,y:ey+5,width:14,height:26,fill:'none',stroke:'#fff','stroke-width':2},svg);
+        el('path',{d:'M'+(sx+33)+' '+(ey+18)+' L'+(sx+39)+' '+(ey+18)+' M'+(sx+37)+' '+(ey+15)+' L'+(sx+40)+' '+(ey+18)+' L'+(sx+37)+' '+(ey+21),stroke:'#fff','stroke-width':1.6,fill:'none','stroke-linecap':'round'},svg);
+        txt(sx+32,ey+41,'비상구',{fill:'#fff','font-size':10,'font-weight':700});
+        // 범례
+        el('rect',{x:30,y:20,width:20,height:20,rx:5,fill:RED},svg);
+        txt(58,36,'1~4열',{fill:'#444','font-size':16,'text-anchor':'start'});
+        el('rect',{x:140,y:20,width:20,height:20,rx:5,fill:BLUE},svg);
+        txt(168,36,'5~8열',{fill:'#444','font-size':16,'text-anchor':'start'});
+        el('rect',{x:30,y:50,width:20,height:20,rx:5,fill:BLACK},svg);
+        txt(58,66,'추가 의자',{fill:'#444','font-size':16,'text-anchor':'start'});
+      }
+    },
+
+    /* ===== 세미나실: 의자 2개 + 책상 1개 = 1세트(1칸) ===== */
+    seminar:{
+      name:'세미나실', title:'세미나실\n좌석 배치', per:2, S:52, CW:72, CG:8, SG:16, RG:22, AW:100, ROW_TOP:84,
+      nRows:9, maxK:3, k:52/58, exin:8.5, eyin:11.5, desk:true, rowFont:15,
+      rows:[[3,3],[3,3],[3,3],[3,3],[3,3],[2,2],[2,2]],          // 열별 [왼쪽, 오른쪽] 세트(의자 2개) 수 = 6|6 x5, 4|4 x2
+      rightBlank:{},
+      color:function(){ return GRAY; },
+      ghost:function(s){
+        if(s.row<=cfg.rows.length){
+          // 1~7열: 양쪽 바깥 끝으로 의자 2개(1세트)까지만
+          return s.k===cfg.rows[s.row-1][s.side==='L'?0:1];
+        }
+        // 세미나실 8~9열 / 팀미팅룸 9열: 뒤쪽 추가 줄: 바로 앞 칸에 세트가 있어야 그 뒤에 추가 가능
+        var f=slotAt(s.row-1,s.side,s.k);
+        return !!(f && f.type);
+      },
+      canDelete:function(s){
+        var b=slotAt(s.row+1,s.side,s.k);                         // 뒤쪽에 이어서 추가된 세트가 있으면 삭제 불가
+        return !(b && b.type);
+      },
+      addMsg:'점선 자리를 클릭하면 의자 2개+책상이 추가, 추가한 의자를 클릭하면 삭제됩니다',
+      helpAdd:'점선 자리 클릭 → 의자 2개(+책상) 추가,<br>추가한 의자 클릭 → 2개 삭제',
+      decor:pairRoomDecor(false)   // 스크린: 오른쪽 사선
+    }
+  };
+
+  /* ===== 팀미팅룸: 세미나실과 같은 세트 방식, 4|4 x 8줄, 스크린 왼쪽 사선, 뒤로 최대 1줄 ===== */
+  ROOMS.team=Object.assign({},ROOMS.seminar,{
+    name:'팀미팅룸', title:'팀미팅룸\n좌석 배치',
+    nRows:9, maxK:2,
+    rows:[[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2]],
+    decor:pairRoomDecor(true)
+  });
+
+  /* ---------- 방 만들기 ---------- */
+  function buildRoom(key){
+    cfg=ROOMS[key]; current=key;
+    S=cfg.S; CG=cfg.CG; SG=cfg.SG; RG=cfg.RG; AW=cfg.AW; ROW_TOP=cfg.ROW_TOP; PER=cfg.per;
+    CWd=cfg.CW||cfg.S; SW=PER*CWd+(PER-1)*CG; SP=SW+SG; RP=S+RG;
+    // 이전 방의 구역/선택 상태 정리
+    for(var g in groups){ groups[g].label.el.remove(); }
+    groups={}; active=0; pending=new Set(); addMode=false; drag=null;
+    marq.style.display='none'; tip.style.display='none';
+    hall.style.setProperty('--k',cfg.k);
+    svg.innerHTML='';
+    defs=el('defs',{},svg);
+    el('rect',{x:8,y:4,width:W-16,height:H-12,rx:18,fill:'#fff',stroke:'#cbd5e1','stroke-width':2},svg);   // 바닥
+    cfg.decor();
+    gSlots=el('g',{},svg); gOut=el('g',{'pointer-events':'none'},svg);
+    slots={}; slotList=[]; seatList=[]; rowTexts={};
+    var rx=Math.round(S*0.2), pfs=Math.round(S*0.52), tfs=S>=50?11:10;
+    for(var row=1;row<=cfg.nRows;row++){
+      (function(row){
+        var y=ROW_TOP+(row-1)*RP;
+        rowTexts[row]=txt(CX,y+S/2+5,row+'열',{fill:'#8a94a6','font-size':cfg.rowFont,'font-weight':700});
+        ['L','R'].forEach(function(side){
+          for(var k=0;k<=cfg.maxK;k++){
+            var x=side==='L'? CX-AW/2-SW-k*SP : CX+AW/2+k*SP;
+            var id='r'+row+side+k;
+            var ghost=el('rect',{x:x,y:y,width:SW,height:S,rx:rx,fill:'rgba(120,130,150,.06)',stroke:'#8a94a6','stroke-width':2,'stroke-dasharray':'6 5'},gSlots);
+            var desk=cfg.desk? el('rect',{x:x,y:y-16,width:SW,height:8,rx:3,fill:DESK},gSlots) : null;
+            var gp=el('text',{x:x+SW/2,y:y+S/2+Math.round(pfs*0.1),'text-anchor':'middle',fill:'#8a94a6','fill-opacity':.55,'font-size':pfs,'font-weight':300,'pointer-events':'none'},gSlots); gp.textContent='+';
+            var gt=el('text',{x:x+SW/2,y:y+S-Math.round(S*0.15),'text-anchor':'middle',fill:'#8a94a6','fill-opacity':.8,'font-size':tfs,'pointer-events':'none'},gSlots); gt.textContent='추가';
+            ghost.style.display='none'; gp.style.display='none'; gt.style.display='none';
+            if(desk) desk.style.display='none';
+            var sl={id:id,row:row,side:side,k:k,x:x,y:y,type:null,ghostEl:ghost,ghostExtra:[gp,gt],desk:desk,chairs:[]};
+            for(var c=0;c<PER;c++){
+              var cx=x+c*(CWd+CG);
+              var r=el('rect',{x:cx,y:y,width:CWd,height:S,rx:rx},gSlots); r.style.display='none';
+              var ch={id:id+'c'+c,row:row,x:cx,y:y,type:null,el:r,slot:sl};
+              sl.chairs.push(ch); seatList.push(ch);
+            }
+            slots[id]=sl; slotList.push(sl);
+          }
+        });
+      })(row);
+    }
+    initSeats();
+    render(); updateInfo();
+  }
+
+  // 고정 의자(기본 배치)만 남기고 나머지 전부 비움
+  function initSeats(){
+    slotList.forEach(function(sl){ setSlotType(sl,null); });
+    cfg.rows.forEach(function(rc,ri){
+      var row=ri+1, bl=cfg.rightBlank[row]||0, i;
+      for(i=0;i<rc[0];i++) setSlotType(slotAt(row,'L',i),'fixed');
+      for(i=0;i<rc[1];i++) setSlotType(slotAt(row,'R',i+bl),'fixed');
+    });
+  }
+
+  /* ---------- 화면 전환 ---------- */
+  var orgName=document.getElementById('orgName'), orgCount=document.getElementById('orgCount');
+  var setup=document.getElementById('setup'), hallScreen=document.getElementById('hallScreen');
+  var hdr=document.getElementById('hdr'), roomTitle=document.getElementById('roomTitle');
+  function enterRoom(key){
+    if(current!==key) buildRoom(key);
+    roomTitle.textContent=cfg.title;
+    help.innerHTML=helpHtml();
+    setup.style.display='none'; hdr.style.display='none'; hallScreen.style.display='block';
+    updateInfo();
+  }
+  document.querySelectorAll('[data-place]').forEach(function(b){
+    b.onclick=function(){ enterRoom(b.getAttribute('data-place')); };
+  });
+  document.getElementById('back').onclick=function(){
+    hallScreen.style.display='none'; setup.style.display='block'; hdr.style.display='flex';
+    active=0; pending=new Set(); addMode=false; render(); tip.style.display='none';
+  };
+  function updateInfo(){
+    document.getElementById('vName').textContent=orgName.value||'-';
+    document.getElementById('vCount').textContent=(orgCount.value||0)+'명';
+  }
+
+  /* ---------- 왼쪽 패널 버튼 ---------- */
+  var botbox=document.getElementById('botbox'), gbox=document.getElementById('gbox'), btns=[];
+  for(var n=1;n<=8;n++){(function(n){
+    var b=document.createElement('button');
+    b.className='gb'; b.textContent=NAMES[n]; b.style.background=COLORS[n]; b.style.color=TXT[n];
+    var ck=document.createElement('span'); ck.className='ck'; ck.textContent='✔'; b.appendChild(ck);
+    b.onclick=function(){
+      addMode=false;
+      if(active===n){ active=0; pending=new Set(); tip.style.display='none'; }
+      else { active=n; pending=new Set(groups[n]?Array.from(groups[n].seats):[]); }
+      render();
+    };
+    gbox.appendChild(b); btns[n]=b;
+  })(n);}
+  var done=document.createElement('button'); done.id='done'; done.innerHTML='선택<br>완료'; botbox.appendChild(done);
+  var addBtn=document.createElement('button'); addBtn.id='addBtn'; addBtn.innerHTML='좌석<br>추가';
+  var resetBtn=document.createElement('button'); resetBtn.id='resetBtn'; resetBtn.textContent='초기화';
+  var row2=document.createElement('div'); row2.id='row2'; row2.appendChild(addBtn); row2.appendChild(resetBtn); botbox.appendChild(row2);
+  var help=document.createElement('div'); help.id='help'; botbox.appendChild(help);
+  function helpHtml(){
+    return '<b>구역</b> ㄱ~ㅇ 선택 후 드래그로 의자 선택<br>(Ctrl+드래그/클릭: 추가·제외)<br><b>선택완료</b> 구역 확정 후 팀명·인원 입력<br><b>좌석추가</b> '+cfg.helpAdd;
+  }
+
+  addBtn.onclick=function(){
+    addMode=!addMode; active=0; pending=new Set(); tip.style.display='none';
+    if(addMode) toast(cfg.addMsg);
+    render();
+  };
+  resetBtn.onclick=function(){
+    askConfirm('모든 구역과 추가한 검정 의자를 지우고,\n단체명·인원수 입력 후 장소를 선택한 처음 상태로 되돌릴까요?', function(){
+      for(var g in groups){ groups[g].label.el.remove(); }   // 구역 테두리·팀명·인원 창 삭제
+      groups={};
+      initSeats();                                            // 기본 의자만 남김
+      active=0; pending=new Set(); addMode=false; drag=null;
+      marq.style.display='none'; tip.style.display='none';
+      render(); updateInfo(); toast('초기화했습니다');
+    });
+  };
+
+  function ownerOf(id){
+    for(var g in groups){ if(+g!==active && groups[g].seats.has(id)) return +g; }
+    return 0;
+  }
+  function inAnyGroup(id){
+    for(var g in groups){ if(groups[g].seats.has(id)) return +g; }
+    return 0;
+  }
+
+  /* ---------- 렌더 ---------- */
+  function render(){
+    var occ={};
+    seatList.forEach(function(c){
+      var e=c.el;
+      if(!c.type){ e.style.display='none'; return; }
+      occ[c.row]=1;
+      e.style.display='block';
+      if(active && pending.has(c.id)){
+        e.setAttribute('fill',COLORS[active]); e.setAttribute('stroke','#111'); e.setAttribute('stroke-width',5); e.style.filter='none';
+      } else {
+        e.setAttribute('fill',cfg.color(c)); e.removeAttribute('stroke'); e.style.filter=ownerOf(c.id)?'blur(3px)':'none';
+      }
+    });
+    slotList.forEach(function(sl){
+      // 구역 선택 중에는 점선 자리를 숨김, 좌석추가 모드에서만 표시
+      var gv=(!sl.type && !active && addMode && cfg.ghost(sl))?'block':'none';
+      sl.ghostEl.style.display=gv; sl.ghostExtra[0].style.display=gv; sl.ghostExtra[1].style.display=gv;
+      if(sl.desk) sl.desk.style.display=sl.type?'block':'none';
+    });
+    for(var r in rowTexts){ rowTexts[r].style.display=(+r<=cfg.rows.length||occ[r])?'block':'none'; }
+    // 구역 테두리 (좌석 합집합의 외곽선: 마스크 방식)
+    defs.innerHTML=''; gOut.innerHTML='';
+    var exi=cfg.exin, eyi=cfg.eyin, RING=13;   // 구역 경계(칸 사이 간격의 중간)에서 안쪽으로 RING px 두께
+    for(var g in groups){
+      if(+g===active) continue;
+      var m=el('mask',{id:'mk'+g,maskUnits:'userSpaceOnUse',x:0,y:0,width:W,height:H},defs);
+      el('rect',{x:0,y:0,width:W,height:H,fill:'#000'},m);
+      var list=seatList.filter(function(c){return c.type && groups[g].seats.has(c.id)});
+      // 구역 전체 모양(바깥 경계) = 흰색, 그 모양을 RING만큼 깎은(erode) 안쪽 = 검정 → 안쪽으로 두꺼운 테두리만 남음
+      list.forEach(function(c){
+        el('rect',{x:c.x-exi,y:c.y-eyi,width:CWd+2*exi,height:S+2*eyi,rx:0,fill:'#fff'},m);
+      });
+      var f=el('filter',{id:'er'+g,filterUnits:'userSpaceOnUse',x:0,y:0,width:W,height:H},defs);
+      el('feMorphology',{operator:'erode',radius:RING},f);
+      var gi=el('g',{filter:'url(#er'+g+')'},m);
+      list.forEach(function(c){
+        el('rect',{x:c.x-exi,y:c.y-eyi,width:CWd+2*exi,height:S+2*eyi,rx:0,fill:'#000'},gi);
+      });
+      el('rect',{x:0,y:0,width:W,height:H,fill:COLORS[g],mask:'url(#mk'+g+')'},gOut);
+    }
+    for(var n=1;n<=8;n++){
+      btns[n].classList.toggle('act',active===n);
+      btns[n].classList.toggle('has',!!groups[n]);
+    }
+    addBtn.classList.toggle('act',addMode);
+    updateTip();
+  }
+
+  /* ---------- 팀명·인원 창 ---------- */
+  function makeLabel(n){
+    var d=document.createElement('div'); d.className='lbl two'; d.style.borderColor=COLORS[n];
+    d.innerHTML='<div class="hd"><input class="tn" type="text" placeholder="팀 이름"></div>'+
+                '<div class="r2"><span class="cap">인원</span><input class="tc" type="number" min="0" placeholder="0"><span class="u">명</span></div>';
+    d.addEventListener('pointerdown',function(e){e.stopPropagation();});
+    hall.appendChild(d);
+    return {el:d};
+  }
+
+  // 크기 고정. 선택한 구역이 한 줄이면 한 줄형(팀명·인원 가로), 두 줄 이상이면 두 줄형
+  function fitLabel(n){
+    var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,rows={};
+    seatList.forEach(function(c){
+      if(c.type && groups[n].seats.has(c.id)){
+        minx=Math.min(minx,c.x); maxx=Math.max(maxx,c.x+CWd);
+        miny=Math.min(miny,c.y); maxy=Math.max(maxy,c.y+S);
+        rows[c.row]=1;
+      }
+    });
+    var one=Object.keys(rows).length===1;
+    var d=groups[n].label.el;
+    d.classList.toggle('one',one); d.classList.toggle('two',!one);
+    d.style.left=((minx+maxx)/2)+'px'; d.style.top=((miny+maxy)/2)+'px';
+  }
+
+  /* ---------- 선택완료 ---------- */
+  done.onclick=function(){
+    if(!active){ toast('왼쪽에서 구역(ㄱ~ㅇ)을 먼저 선택하세요'); return; }
+    var n=active;
+    if(pending.size===0){
+      if(groups[n]){ groups[n].label.el.remove(); delete groups[n]; toast(NAMES[n]+' 구역을 삭제했습니다'); }
+      else { toast('선택된 좌석이 없습니다'); return; }
+    } else {
+      if(!groups[n]) groups[n]={seats:new Set(),label:makeLabel(n)};
+      groups[n].seats=new Set(pending);
+      fitLabel(n);
+    }
+    active=0; pending=new Set(); tip.style.display='none';
+    render(); updateInfo();
+  };
+
+  /* ---------- 드래그 선택 / 추가 의자 ---------- */
+  var tip=document.getElementById('tip'), drag=null;
+  function local(e){
+    var r=hall.getBoundingClientRect();   // 좌석 영역이 확대(transform)되어 있으므로 실제 표시 크기 비율로 환산
+    var fx=r.width?W/r.width:1/scale, fy=r.height?H/r.height:1/scale;
+    return {x:(e.clientX-r.left)*fx, y:(e.clientY-r.top)*fy};
+  }
+  function slotAtPoint(x,y){
+    for(var i=0;i<slotList.length;i++){
+      var s=slotList[i];
+      if(x>=s.x && x<=s.x+SW && y>=s.y && y<=s.y+S){
+        if(s.type || cfg.ghost(s)) return s;
+      }
+    }
+    return null;
+  }
+  function hitSeats(x1,y1,x2,y2){
+    var l=Math.min(x1,x2), r=Math.max(x1,x2), t=Math.min(y1,y2), b=Math.max(y1,y2), set=new Set();
+    seatList.forEach(function(c){
+      if(!c.type) return;
+      if(ownerOf(c.id)) return; // 다른 구역에 이미 배정된 좌석은 제외
+      if(c.x<=r && c.x+CWd>=l && c.y<=b && c.y+S>=t) set.add(c.id);
+    });
+    return set;
+  }
+  function apply(p){
+    var hit=hitSeats(drag.x,drag.y,p.x,p.y), res;
+    if(drag.mode==='replace') res=hit;
+    else if(drag.mode==='add'){ res=new Set(drag.base); hit.forEach(function(id){res.add(id)}); }
+    else { res=new Set(drag.base); hit.forEach(function(id){res.delete(id)}); }
+    pending=res;
+    var moved=Math.abs(p.x-drag.x)>3||Math.abs(p.y-drag.y)>3;
+    if(moved){
+      marq.style.display='block';
+      marq.style.left=Math.min(drag.x,p.x)+'px'; marq.style.top=Math.min(drag.y,p.y)+'px';
+      marq.style.width=Math.abs(p.x-drag.x)+'px'; marq.style.height=Math.abs(p.y-drag.y)+'px';
+      marq.style.borderColor=COLORS[active];
+    } else marq.style.display='none';
+    render();
+  }
+  hall.addEventListener('pointerdown',function(e){
+    if(e.button!==0) return;
+    var p=local(e);
+    if(!active){
+      // 구역 선택 전: 좌석추가 모드에서 점선 자리 클릭 → 검정 의자 추가 / 검정 의자 클릭 → 삭제
+      if(!addMode){ toast('구역(ㄱ~ㅇ) 또는 좌석추가 버튼을 먼저 선택하세요'); return; }
+      var sl=slotAtPoint(p.x,p.y);
+      if(!sl) return;
+      if(!sl.type){ setSlotType(sl,'black'); }
+      else if(sl.type==='black'){
+        if(sl.chairs.some(function(c){return inAnyGroup(c.id)})){ toast('구역에 배정된 의자입니다. 구역에서 먼저 제외하세요'); return; }
+        if(!cfg.canDelete(sl)){ toast('뒤쪽에 추가한 의자를 먼저 삭제하세요'); return; }
+        setSlotType(sl,null);
+      } else { toast('기본 의자는 삭제할 수 없습니다'); return; }
+      render();
+      return;
+    }
+    e.preventDefault();
+    hall.setPointerCapture(e.pointerId);
+    var ctrl=e.ctrlKey||e.metaKey, mode='replace';
+    if(ctrl){
+      var first=Array.from(hitSeats(p.x,p.y,p.x,p.y))[0];
+      mode=(first && pending.has(first))?'remove':'add';
+    }
+    drag={x:p.x,y:p.y,mode:mode,base:new Set(pending)};
+    apply(p);
+  });
+  hall.addEventListener('pointermove',function(e){
+    tip.style.left=(e.clientX+18)+'px'; tip.style.top=(e.clientY+18)+'px';
+    if(drag) apply(local(e));
+  });
+  function end(){ if(!drag) return; drag=null; marq.style.display='none'; }
+  hall.addEventListener('pointerup',end);
+  hall.addEventListener('pointercancel',end);
+  hall.addEventListener('pointerenter',function(){ updateTip(); });
+  hall.addEventListener('pointerleave',function(){ tip.style.display='none'; });
+  function updateTip(){
+    if(active){
+      tip.style.display='block';
+      tip.style.background=COLORS[active]; tip.style.color=TXT[active];
+      tip.textContent='선택 '+pending.size+'석';
+    } else tip.style.display='none';
+  }
+
+  /* ---------- 확인창 / 안내 ---------- */
+  // 브라우저 기본 confirm은 일부 환경에서 막히므로 화면 안에 직접 표시
+  var modal=document.getElementById('modal'), mMsg=document.getElementById('mMsg'), mCb=null;
+  function askConfirm(msg,cb){ mMsg.textContent=msg; mCb=cb; modal.style.display='flex'; }
+  document.getElementById('mOk').onclick=function(){ modal.style.display='none'; var f=mCb; mCb=null; if(f) f(); };
+  document.getElementById('mNo').onclick=function(){ modal.style.display='none'; mCb=null; };
+
+  var toastEl=document.getElementById('toast'), toastT=null;
+  function toast(m){
+    toastEl.textContent=m; toastEl.style.display='block';
+    clearTimeout(toastT); toastT=setTimeout(function(){toastEl.style.display='none'},2400);
+  }
+
+  orgName.addEventListener('input',updateInfo);
+  orgCount.addEventListener('input',updateInfo);
+  buildRoom('media');
+})();
+</script>
+</body>
+</html>
