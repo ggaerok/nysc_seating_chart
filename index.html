@@ -54,7 +54,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 #addBtn.act{outline:4px solid #111;outline-offset:2px}
 #resetBtn{background:#b71c1c}
 #resetBtn:hover{background:#7f0000}
-#hall{position:absolute;left:276px;top:26px;width:1560px;height:808px;cursor:crosshair;transform:scale(1.05);transform-origin:0 0}
+#hall{position:absolute;left:364px;top:138px;width:1560px;height:808px;cursor:crosshair;transform:scale(0.93);transform-origin:0 0}
+/* 안내사항: 좌석 영역 흰 바닥((1560-16)x0.93=1436px)과 같은 너비·위치의 흰색 박스 */
+#noteBox{position:absolute;left:371px;top:10px;width:1436px;height:120px;background:#fff;border:2px solid #cbd5e1;border-radius:18px;padding:12px 22px}
+#note{width:100%;height:100%;border:0;outline:none;resize:none;background:transparent;font-family:inherit;font-size:24px;line-height:1.45;color:#111;user-select:text;-webkit-user-select:text}
+#note::placeholder{color:#aab3c2}
 #hall svg{position:absolute;left:0;top:0}
 #marq{position:absolute;display:none;border:2px dashed #111;background:rgba(0,0,0,.08);pointer-events:none;z-index:5}
 /* 팀명·인원 창 (기본 크기는 의자 58px 기준, 방마다 --k 비율로 맞춤) */
@@ -134,6 +138,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     <div id="hall">
       <div id="marq"></div>
     </div>
+    <div id="noteBox"><textarea id="note" placeholder="📢 안내사항을 입력하세요" spellcheck="false"></textarea></div>
     <div id="toast"></div>
   </div>
 
@@ -194,6 +199,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
   function setSlotType(sl,t){ sl.type=t; sl.chairs.forEach(function(c){ c.type=t; }); }
 
 
+  /* 비상구 표지판 (달리는 사람 + 문): 출입구 옆에 붙임 */
+  function exitSign(sx,ey){
+        el('rect',{x:sx,y:ey,width:64,height:44,rx:6,fill:'#0a8f3c',stroke:'#fff','stroke-width':2},svg);
+        el('circle',{cx:sx+24,cy:ey+8,r:3.8,fill:'#fff'},svg);
+        el('path',{d:'M'+(sx+22)+' '+(ey+13)+' L'+(sx+18)+' '+(ey+22)+' M'+(sx+19)+' '+(ey+15)+' L'+(sx+11)+' '+(ey+19)+' M'+(sx+21)+' '+(ey+14)+' L'+(sx+29)+' '+(ey+11)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+11)+' '+(ey+30)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+25)+' '+(ey+28)+' L'+(sx+23)+' '+(ey+33),stroke:'#fff','stroke-width':2.4,'stroke-linecap':'round','stroke-linejoin':'round',fill:'none'},svg);
+        el('rect',{x:sx+41,y:ey+5,width:14,height:26,fill:'none',stroke:'#fff','stroke-width':2},svg);
+        el('path',{d:'M'+(sx+33)+' '+(ey+18)+' L'+(sx+39)+' '+(ey+18)+' M'+(sx+37)+' '+(ey+15)+' L'+(sx+40)+' '+(ey+18)+' L'+(sx+37)+' '+(ey+21),stroke:'#fff','stroke-width':1.6,fill:'none','stroke-linecap':'round'},svg);
+        txt(sx+32,ey+41,'비상구',{fill:'#fff','font-size':10,'font-weight':700});
+  }
+
   /* 의자 2개 + 책상 1개 세트 방(세미나실·팀미팅룸) 공용 장식. screenLeft=true면 스크린을 왼쪽 사선으로 */
   function pairRoomDecor(screenLeft){
     return function(){
@@ -201,14 +216,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
       el('rect',{x:CX-300,y:12,width:600,height:30,rx:4,fill:'#2f5d3a',stroke:'#8d6e63','stroke-width':4},svg);
       txt(CX,34,'무대',{fill:'#fff','font-size':18,'font-weight':700,'letter-spacing':6});
       // 스크린 (한쪽 옆, 살짝 대각선)
-      var sxc=screenLeft? W-1450 : 1450;
-      var g=el('g',{transform:'rotate('+(screenLeft?-24:24)+' '+sxc+' 52)'},svg);
-      el('rect',{x:sxc-85,y:44,width:170,height:16,rx:3,fill:'#f5f5f5',stroke:'#555','stroke-width':2},g);
-      var st=el('text',{x:sxc,y:56,'text-anchor':'middle',fill:'#333','font-size':12,'font-weight':700},g); st.textContent='스크린';
+      var sxc=screenLeft? W-1445 : 1445;
+      var g=el('g',{transform:'rotate('+(screenLeft?-20:20)+' '+sxc+' 52)'},svg);
+      el('rect',{x:sxc-100,y:38,width:200,height:28,rx:4,fill:'#f5f5f5',stroke:'#555','stroke-width':2.5},g);
+      var st=el('text',{x:sxc,y:58,'text-anchor':'middle',fill:'#222','font-size':18,'font-weight':800,'letter-spacing':2},g); st.textContent='스크린';
       // 출입구: 중앙 복도에서 의자 2칸 만큼 오른쪽, 맨 뒤(하단)
       var ey=H-56, dc=CX+2*CWd+CG, ex=dc-75;
       el('rect',{x:ex,y:ey,width:150,height:44,rx:8,fill:'#2e7d32'},svg);
       txt(ex+75,ey+29,'출입구',{fill:'#fff','font-size':22,'font-weight':700});
+      exitSign(ex+158,ey);   // 출입구 옆 비상구 표지판
       // 범례 (스크린과 겹치지 않는 쪽)
       var lx=screenLeft? W-270 : 30;
       el('rect',{x:lx,y:20,width:20,height:20,rx:5,fill:GRAY},svg);
@@ -249,13 +265,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
         var ey=H-56, rbCenter=(CX+AW/2 + CX+AW/2+9*72+58)/2, ex=rbCenter-111;
         el('rect',{x:ex,y:ey,width:150,height:44,rx:8,fill:'#2e7d32'},svg);
         txt(ex+75,ey+29,'출입구',{fill:'#fff','font-size':22,'font-weight':700});
-        var sx=ex+158;
-        el('rect',{x:sx,y:ey,width:64,height:44,rx:6,fill:'#0a8f3c',stroke:'#fff','stroke-width':2},svg);
-        el('circle',{cx:sx+24,cy:ey+8,r:3.8,fill:'#fff'},svg);
-        el('path',{d:'M'+(sx+22)+' '+(ey+13)+' L'+(sx+18)+' '+(ey+22)+' M'+(sx+19)+' '+(ey+15)+' L'+(sx+11)+' '+(ey+19)+' M'+(sx+21)+' '+(ey+14)+' L'+(sx+29)+' '+(ey+11)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+11)+' '+(ey+30)+' M'+(sx+18)+' '+(ey+22)+' L'+(sx+25)+' '+(ey+28)+' L'+(sx+23)+' '+(ey+33),stroke:'#fff','stroke-width':2.4,'stroke-linecap':'round','stroke-linejoin':'round',fill:'none'},svg);
-        el('rect',{x:sx+41,y:ey+5,width:14,height:26,fill:'none',stroke:'#fff','stroke-width':2},svg);
-        el('path',{d:'M'+(sx+33)+' '+(ey+18)+' L'+(sx+39)+' '+(ey+18)+' M'+(sx+37)+' '+(ey+15)+' L'+(sx+40)+' '+(ey+18)+' L'+(sx+37)+' '+(ey+21),stroke:'#fff','stroke-width':1.6,fill:'none','stroke-linecap':'round'},svg);
-        txt(sx+32,ey+41,'비상구',{fill:'#fff','font-size':10,'font-weight':700});
+        exitSign(ex+158,ey);
         // 범례
         el('rect',{x:30,y:20,width:20,height:20,rx:5,fill:PINK},svg);
         txt(58,36,'1~4열',{fill:'#444','font-size':16,'text-anchor':'start'});
@@ -292,10 +302,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     }
   };
 
-  /* ===== 팀미팅룸: 세미나실과 같은 세트 방식, 4|4 x 8줄, 스크린 왼쪽 사선, 뒤로 최대 1줄 ===== */
+  /* ===== 팀미팅룸: 세미나실과 같은 세트 방식, 4|4 x 8줄, 스크린 왼쪽 사선, 뒤로 최대 2줄 ===== */
   ROOMS.team=Object.assign({},ROOMS.seminar,{
     name:'팀미팅룸', title:'팀미팅룸\n좌석 배치',
-    nRows:9, maxK:2,
+    nRows:10, maxK:2,                      // 4|4 x 8줄 + 뒤쪽 추가 2줄(9~10열)
+    S:46, RG:22, ROW_TOP:76, k:46/58,      // 10줄이 들어가도록 의자 세로·줄 간격만 조금 줄임
     rows:[[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2]],
     decor:pairRoomDecor(true)
   });
