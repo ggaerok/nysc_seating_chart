@@ -160,7 +160,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 
   /* ---------- 공통 상수 ---------- */
   var W=1560, H=808, CX=W/2;
-  var RED='#e5484d', BLUE='#3b82f6', GRAY='#9aa3b2', BLACK='#1a1a1a', DESK='#a1887f';
+  var PINK='#f5a9bd', SKY='#9fd3f3', GRAY='#9aa3b2', DESK='#a1887f';   // 영상관: 1~4열 연분홍 / 5~8열 연하늘 / 추가 의자 회색
   var COLORS=['','#ff9800','#00b85c','#9c27b0','#ff3d8b','#00bcd4','#c6d800','#795548','#607d8b'];
   var TXT=['','#fff','#fff','#fff','#fff','#fff','#222','#fff','#fff'];
   var NAMES=['','ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ'];
@@ -223,10 +223,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     /* ===== 멀티미디어 영상관: 의자 1개 = 1칸 ===== */
     media:{
       name:'멀티미디어 영상관', title:'영상관\n좌석 배치', per:1, S:58, CG:0, SG:14, RG:14, AW:100, ROW_TOP:108,
-      nRows:9, maxK:9, k:1, exin:7.5, eyin:7.5, desk:false, rowFont:18,
+      nRows:9, maxK:9, k:1, exin:7.5, eyin:7.5, desk:false, rowFont:28,
       rows:[[7,7],[8,8],[9,9],[9,9],[9,9],[8,8],[7,7],[7,4]],   // 열별 [왼쪽, 오른쪽] 고정 의자 수
       rightBlank:{8:2},                                          // 8열 오른쪽 통로 쪽 장애인석 2칸 비움
-      color:function(c){ return c.type==='black'?BLACK:(c.row<=4?RED:BLUE); },
+      color:function(c){ return c.type==='black'?GRAY:(c.row<=4?PINK:SKY); },
       ghost:function(s){
         if(s.row===8 && s.side==='R' && s.k<2) return true;      // 장애인석으로 비운 자리
         if(s.row===9){                                           // 8열 뒤: 왼쪽 7칸 + 장애인석 아래 2칸
@@ -237,8 +237,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
         return false;
       },
       canDelete:function(){ return true; },
-      addMsg:'점선 자리를 클릭하면 검정 의자 추가, 검정 의자를 클릭하면 삭제됩니다',
-      helpAdd:'점선 자리 클릭 → 검정 의자 추가,<br>검정 의자 클릭 → 삭제',
+      addMsg:'점선 자리를 클릭하면 의자 추가, 추가한 의자를 클릭하면 삭제됩니다',
+      helpAdd:'점선 자리 클릭 → 의자 추가,<br>추가한 의자 클릭 → 삭제',
       decor:function(){
         // 스크린 / 무대
         el('rect',{x:CX-430,y:12,width:860,height:28,rx:6,fill:'#222'},svg);
@@ -257,11 +257,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
         el('path',{d:'M'+(sx+33)+' '+(ey+18)+' L'+(sx+39)+' '+(ey+18)+' M'+(sx+37)+' '+(ey+15)+' L'+(sx+40)+' '+(ey+18)+' L'+(sx+37)+' '+(ey+21),stroke:'#fff','stroke-width':1.6,fill:'none','stroke-linecap':'round'},svg);
         txt(sx+32,ey+41,'비상구',{fill:'#fff','font-size':10,'font-weight':700});
         // 범례
-        el('rect',{x:30,y:20,width:20,height:20,rx:5,fill:RED},svg);
+        el('rect',{x:30,y:20,width:20,height:20,rx:5,fill:PINK},svg);
         txt(58,36,'1~4열',{fill:'#444','font-size':16,'text-anchor':'start'});
-        el('rect',{x:140,y:20,width:20,height:20,rx:5,fill:BLUE},svg);
+        el('rect',{x:140,y:20,width:20,height:20,rx:5,fill:SKY},svg);
         txt(168,36,'5~8열',{fill:'#444','font-size':16,'text-anchor':'start'});
-        el('rect',{x:30,y:50,width:20,height:20,rx:5,fill:BLACK},svg);
+        el('rect',{x:30,y:50,width:20,height:20,rx:5,fill:GRAY},svg);
         txt(58,66,'추가 의자',{fill:'#444','font-size':16,'text-anchor':'start'});
       }
     },
@@ -269,7 +269,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     /* ===== 세미나실: 의자 2개 + 책상 1개 = 1세트(1칸) ===== */
     seminar:{
       name:'세미나실', title:'세미나실\n좌석 배치', per:2, S:52, CW:72, CG:8, SG:16, RG:22, AW:100, ROW_TOP:84,
-      nRows:9, maxK:3, k:52/58, exin:8.5, eyin:11.5, desk:true, rowFont:15,
+      nRows:9, maxK:3, k:52/58, exin:8.5, eyin:11.5, desk:true, rowFont:28,
       rows:[[3,3],[3,3],[3,3],[3,3],[3,3],[2,2],[2,2]],          // 열별 [왼쪽, 오른쪽] 세트(의자 2개) 수 = 6|6 x5, 4|4 x2
       rightBlank:{},
       color:function(){ return GRAY; },
@@ -320,7 +320,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     for(var row=1;row<=cfg.nRows;row++){
       (function(row){
         var y=ROW_TOP+(row-1)*RP;
-        rowTexts[row]=txt(CX,y+S/2+5,row+'열',{fill:'#8a94a6','font-size':cfg.rowFont,'font-weight':700});
+        rowTexts[row]=txt(CX,y+S/2+Math.round(cfg.rowFont*0.35),row+'열',{fill:'#111','font-size':cfg.rowFont,'font-weight':800});
         ['L','R'].forEach(function(side){
           for(var k=0;k<=cfg.maxK;k++){
             var x=side==='L'? CX-AW/2-SW-k*SP : CX+AW/2+k*SP;
@@ -409,7 +409,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     render();
   };
   resetBtn.onclick=function(){
-    askConfirm('모든 구역과 추가한 검정 의자를 지우고,\n단체명·인원수 입력 후 장소를 선택한 처음 상태로 되돌릴까요?', function(){
+    askConfirm('모든 구역과 추가한 의자를 지우고,\n단체명·인원수 입력 후 장소를 선택한 처음 상태로 되돌릴까요?', function(){
       for(var g in groups){ groups[g].label.el.remove(); }   // 구역 테두리·팀명·인원 창 삭제
       groups={};
       initSeats();                                            // 기본 의자만 남김
@@ -437,9 +437,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
       occ[c.row]=1;
       e.style.display='block';
       if(active && pending.has(c.id)){
-        e.setAttribute('fill',COLORS[active]); e.setAttribute('stroke','#111'); e.setAttribute('stroke-width',5); e.style.filter='none';
+        e.setAttribute('fill',COLORS[active]); e.setAttribute('stroke','#111'); e.setAttribute('stroke-width',5); e.style.filter='none'; e.style.opacity=1;
       } else {
-        e.setAttribute('fill',cfg.color(c)); e.removeAttribute('stroke'); e.style.filter=ownerOf(c.id)?'blur(3px)':'none';
+        var own=ownerOf(c.id);   // 선택완료된 구역 의자는 블러 + 연하게
+        e.setAttribute('fill',cfg.color(c)); e.removeAttribute('stroke'); e.style.filter=own?'blur(3px)':'none'; e.style.opacity=own?0.45:1;
       }
     });
     slotList.forEach(function(sl){
@@ -461,12 +462,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
       list.forEach(function(c){
         el('rect',{x:c.x-exi,y:c.y-eyi,width:CWd+2*exi,height:S+2*eyi,rx:0,fill:'#fff'},m);
       });
+      // 통로 양쪽을 모두 선택한 줄은 통로까지 구역에 포함
+      var hasL={}, hasR={}, bridgeY=[];
+      list.forEach(function(c){ if(c.slot.k===0){ (c.slot.side==='L'?hasL:hasR)[c.row]=1; } });
+      Object.keys(hasL).forEach(function(r){ if(hasR[r]) bridgeY.push(ROW_TOP+(r-1)*RP-eyi); });
+      bridgeY.forEach(function(by){ el('rect',{x:CX-AW/2,y:by,width:AW,height:S+2*eyi,rx:0,fill:'#fff'},m); });
       var f=el('filter',{id:'er'+g,filterUnits:'userSpaceOnUse',x:0,y:0,width:W,height:H},defs);
       el('feMorphology',{operator:'erode',radius:RING},f);
       var gi=el('g',{filter:'url(#er'+g+')'},m);
       list.forEach(function(c){
         el('rect',{x:c.x-exi,y:c.y-eyi,width:CWd+2*exi,height:S+2*eyi,rx:0,fill:'#000'},gi);
       });
+      bridgeY.forEach(function(by){ el('rect',{x:CX-AW/2,y:by,width:AW,height:S+2*eyi,rx:0,fill:'#000'},gi); });
       el('rect',{x:0,y:0,width:W,height:H,fill:COLORS[g],mask:'url(#mk'+g+')'},gOut);
     }
     for(var n=1;n<=8;n++){
@@ -489,9 +496,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 
   // 크기 고정. 선택한 구역이 한 줄이면 한 줄형(팀명·인원 가로), 두 줄 이상이면 두 줄형
   function fitLabel(n){
-    var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,rows={};
+    var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9,rows={}, hasL=false, hasR=false;
     seatList.forEach(function(c){
-      if(c.type && groups[n].seats.has(c.id)){
+      if(c.type && groups[n].seats.has(c.id)){ if(c.slot.side==='L') hasL=true; else hasR=true; }
+    });
+    var both=hasL && hasR;      // 통로 양쪽을 모두 선택한 경우 → 왼쪽 구역 기준으로 표시
+    seatList.forEach(function(c){
+      if(c.type && groups[n].seats.has(c.id) && (!both || c.slot.side==='L')){
         minx=Math.min(minx,c.x); maxx=Math.max(maxx,c.x+CWd);
         miny=Math.min(miny,c.y); maxy=Math.max(maxy,c.y+S);
         rows[c.row]=1;
@@ -563,7 +574,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
     if(e.button!==0) return;
     var p=local(e);
     if(!active){
-      // 구역 선택 전: 좌석추가 모드에서 점선 자리 클릭 → 검정 의자 추가 / 검정 의자 클릭 → 삭제
+      // 구역 선택 전: 좌석추가 모드에서 점선 자리 클릭 → 의자 추가 / 추가한 의자 클릭 → 삭제
       if(!addMode){ toast('구역(ㄱ~ㅇ) 또는 좌석추가 버튼을 먼저 선택하세요'); return; }
       var sl=slotAtPoint(p.x,p.y);
       if(!sl) return;
