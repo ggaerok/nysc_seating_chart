@@ -29,34 +29,34 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 /* 좌석 화면 */
 #hallScreen{position:absolute;left:0;top:0;width:1920px;height:900px;display:none}
 #panel{position:absolute;left:24px;top:12px;width:380px;height:876px;display:flex;flex-direction:column;gap:8px}
-#roomTitle{white-space:nowrap;background:#111;color:#ffd600;border-radius:8px;padding:9px 16px;font-size:22px;font-weight:800;line-height:1.3;letter-spacing:1px}
-#orgInfo{background:#fff;border-radius:8px;padding:10px 16px 12px;border:3px solid #111}
+#roomTitle{white-space:nowrap;background:#c7d2fe;color:#3730a3;border:3px solid #7c88a3;border-radius:8px;padding:9px 16px;font-size:22px;font-weight:800;line-height:1.3;letter-spacing:1px}
+#orgInfo{background:#fff;border-radius:8px;padding:10px 16px 12px;border:3px solid #7c88a3}
 #orgInfo .k{font-size:13px;color:#667}
 #orgInfo #vName{font-weight:800;color:#111;line-height:1.15;word-break:break-all;margin:2px 0 8px;font-size:40px;white-space:nowrap}
-#orgInfo .cnt{display:flex;align-items:baseline;gap:10px;border-top:3px solid #111;padding-top:8px}
+#orgInfo .cnt{display:flex;align-items:baseline;gap:10px;border-top:3px solid #7c88a3;padding-top:8px}
 #orgInfo #vCount{font-size:30px;font-weight:800;color:#111}
 #botbox{margin-top:2px;display:flex;flex-direction:column;gap:9px;align-items:stretch}
-.card2{background:#fff;border-radius:8px;padding:8px 12px 12px;border:3px solid #111;display:flex;flex-direction:column;gap:7px}
+.card2{background:#fff;border-radius:8px;padding:8px 12px 12px;border:3px solid #7c88a3;display:flex;flex-direction:column;gap:7px}
 .card2 h3{font-size:13px;color:#555;font-weight:800}
-/* 굵은 컬러블록: 굵은 검정 테두리 + 선명한 단색 + 딱딱한 그림자 */
+/* 파스텔 톤: 굵은 테두리·딱딱한 그림자 모양은 유지, 색만 부드럽게 */
 .btn,#botbox button{font-family:inherit;cursor:pointer;line-height:1.25}
-.cb{border:3px solid #111;border-radius:8px;box-shadow:4px 4px 0 #111;color:#111;font-weight:800;font-size:19px;padding:0;transition:transform .06s,box-shadow .06s}
-.cb:hover{transform:translate(1px,1px);box-shadow:3px 3px 0 #111}
-.cb:active{transform:translate(4px,4px);box-shadow:0 0 0 #111}
-#uiBtn{width:100%;height:46px;background:#111;color:#ffd600;font-size:20px;letter-spacing:1px}
+.cb{border:3px solid #7c88a3;border-radius:8px;box-shadow:4px 4px 0 #7c88a3;color:#3b3f55;font-weight:800;font-size:19px;padding:0;transition:transform .06s,box-shadow .06s}
+.cb:hover{transform:translate(1px,1px);box-shadow:3px 3px 0 #7c88a3}
+.cb:active{transform:translate(4px,4px);box-shadow:0 0 0 #7c88a3}
+#uiBtn{width:100%;height:46px;background:#cbd5e1;color:#334155;font-size:20px;letter-spacing:1px}
 #gbox{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:78px;justify-items:center;padding-top:2px}
-.gb{width:70px;height:70px;border-radius:50% !important;font-size:30px;position:relative;box-shadow:3px 3px 0 #111}
-.gb.act{box-shadow:0 0 0 4px #ffd600,0 0 0 7px #111;transform:scale(1.06)}
-.gb .ck{position:absolute;right:-2px;top:-4px;font-size:15px;display:none;background:#fff;border:2px solid #111;border-radius:50%;width:22px;height:22px;line-height:18px;text-align:center;color:#111}
+.gb{width:70px;height:70px;border-radius:50% !important;font-size:30px;position:relative;box-shadow:3px 3px 0 #7c88a3}
+.gb.act{box-shadow:0 0 0 4px #fde68a,0 0 0 7px #7c88a3;transform:scale(1.06)}
+.gb .ck{position:absolute;right:-2px;top:-4px;font-size:15px;display:none;background:#fff;border:2px solid #7c88a3;border-radius:50%;width:22px;height:22px;line-height:18px;text-align:center;color:#3b3f55}
 .gb.has .ck{display:block}
-#done{width:100%;height:62px;border-radius:40px;background:#ff3d00;color:#fff;font-size:26px;letter-spacing:3px}
+#done{width:100%;height:62px;border-radius:40px;background:#fda4af;color:#7f1d1d;font-size:26px;letter-spacing:3px}
 #tools{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 #tools .cb{height:50px;border-radius:30px;font-size:19px}
-#addBtn{background:#00c853}
-#addBtn.act{background:#111;color:#00e676;box-shadow:0 0 0 4px #00e676,0 0 0 7px #111}
-#resetBtn{background:#fff;color:#d50000}
-#btnTop,#btnFull{background:#ffd600}
-#back{background:#fff;grid-column:span 2}
+#addBtn{background:#a7f3d0;color:#065f46}
+#addBtn.act{background:#34d399;color:#064e3b;box-shadow:0 0 0 4px #a7f3d0,0 0 0 7px #7c88a3}
+#resetBtn{background:#ffe4e6;color:#be123c}
+#btnTop,#btnFull{background:#fde68a;color:#78350f}
+#back{background:#f1f5f9;color:#475569;grid-column:span 2}
 /* UI 감추기: UI 보이기 버튼만 남김 */
 #botbox.uihide .card2{visibility:hidden}
 #hall{position:absolute;left:424px;top:138px;width:1560px;height:808px;cursor:crosshair;transform:scale(0.93);transform-origin:0 0}
@@ -477,7 +477,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
   var botbox=document.getElementById('botbox'), gbox=document.getElementById('gbox'), btns=[];
   for(var n=1;n<=8;n++){(function(n){
     var b=document.createElement('button');
-    b.className='gb cb'; b.textContent=NAMES[n]; b.style.background=COLORS[n]; b.style.color=TXT[n];
+    b.className='gb cb'; b.textContent=NAMES[n]; b.style.background='color-mix(in srgb,'+COLORS[n]+' 50%,#fff)'; b.style.color='#3b3f55';
     var ck=document.createElement('span'); ck.className='ck'; ck.textContent='✔'; b.appendChild(ck);
     b.onclick=function(){
       addMode=false;
