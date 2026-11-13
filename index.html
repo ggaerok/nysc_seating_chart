@@ -284,6 +284,7 @@ html,body{background:#efe6cf}
 #fbBar button.on,#tpBar button.on{background:#4a3f2a;color:#fff;border-color:#4a3f2a}
 #fbHide{background:#d1495b !important;border-color:#d1495b !important;color:#fff !important}
 #toast{background:rgba(74,63,42,.92)}
+#fullBox.uihide #fbBar .grp{visibility:hidden}
 </style>
 </head>
 <body>
@@ -611,6 +612,7 @@ html,body{background:#efe6cf}
   var uiBtn=document.getElementById('uiBtn');
   uiBtn.onclick=function(){
     var h=document.getElementById('botbox').classList.toggle('uihide');
+    document.getElementById('fullBox').classList.toggle('uihide',h);   // 전체 공지의 글자 편집 버튼도 함께 숨김/표시
     uiBtn.textContent=h?'UI 보이기':'UI 감추기';
     if(h){ active=0; pending=new Set(); addMode=false; tip.style.display='none'; render(); }
   };
