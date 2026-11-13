@@ -117,7 +117,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 #hallScreen{position:absolute;left:0;top:0;width:1920px;height:900px;display:none}
 #panel{position:absolute;left:24px;top:12px;width:380px;height:876px;display:flex;flex-direction:column;gap:8px}
 #titleRow{display:flex;gap:8px;align-items:stretch}
-#surveyBtn{flex:0 0 92px;display:flex;align-items:center;justify-content:center;background:#e9d5ff;color:#6b21a8;font-size:21px;text-decoration:none;letter-spacing:1px;box-sizing:border-box}
+#surveyBtn{display:flex;align-items:center;justify-content:center;background:#e9d5ff;color:#6b21a8;font-size:21px;text-decoration:none;letter-spacing:1px;box-sizing:border-box}
 #roomTitle{flex:1;min-width:0;white-space:nowrap;background:#c7d2fe;color:#3730a3;border:3px solid #7c88a3;border-radius:8px;padding:9px 16px;font-size:22px;font-weight:800;line-height:1.3;letter-spacing:1px}
 #orgInfo{background:#fff;border-radius:8px;padding:10px 16px 12px;border:3px solid #7c88a3}
 #orgInfo .k{font-size:13px;color:#667}
@@ -145,7 +145,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 #addBtn.act{background:#34d399;color:#064e3b;box-shadow:0 0 0 4px #a7f3d0,0 0 0 7px #7c88a3}
 #resetBtn{background:#ffe4e6;color:#be123c}
 #btnTop,#btnFull{background:#fde68a;color:#78350f}
-#back{background:#f1f5f9;color:#475569;grid-column:span 2}
+#back{background:#f1f5f9;color:#475569}
 /* UI 감추기: UI 보이기 버튼만 남김 */
 #botbox.uihide .card2{visibility:hidden}
 #hall{position:absolute;left:424px;top:138px;width:1560px;height:808px;cursor:crosshair;transform:scale(0.93);transform-origin:0 0}
@@ -251,7 +251,7 @@ html,body{background:#efe6cf}
 .places button:disabled{background:#efe9d9;color:#a3977c;border:3px dashed #cfc3a8;box-shadow:none;cursor:not-allowed}
 .places button small{font-size:16px;margin-top:6px;opacity:.8}
 /* 좌석 화면 */
-#roomTitle{background:#ffe08a;color:#4a3f2a;border:4px solid #fff;box-shadow:0 0 0 2px #d9cdb2,0 5px 8px rgba(0,0,0,.2);border-radius:18px}
+#roomTitle{text-align:center;font-size:33px!important;padding:14px 12px!important;letter-spacing:0!important;background:#ffe08a;color:#4a3f2a;border:4px solid #fff;box-shadow:0 0 0 2px #d9cdb2,0 5px 8px rgba(0,0,0,.2);border-radius:18px}
 #orgInfo{background:#fff;border:3px dashed #b8a98a;border-radius:16px;color:#4a3f2a}
 #orgInfo .k{color:#8a7d60}
 #orgInfo #vName,#orgInfo #vCount{color:#4a3f2a}
@@ -262,7 +262,7 @@ html,body{background:#efe6cf}
 .cb:hover{transform:translateY(-2px);box-shadow:0 0 0 2px #d9cdb2,0 7px 10px rgba(0,0,0,.22)}
 .cb:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
 #uiBtn{background:#cdbf9e;color:#4a3f2a}
-#surveyBtn{background:#c9b8f5;color:#3f2f73}
+#surveyBtn{background:#c9b8f5;color:#3f2f73;font-size:inherit;letter-spacing:0}
 .gb{box-shadow:0 0 0 2px #d9cdb2,0 5px 8px rgba(0,0,0,.22)}
 .gb:hover{transform:translateY(-2px)}
 .gb.act{box-shadow:0 0 0 4px #fff,0 0 0 7px #e0a458;transform:scale(1.06)}
@@ -302,6 +302,9 @@ html,body{background:#efe6cf}
 .lbl.one .r2{padding:0 4px}
 .lbl.one .tc{width:70px;height:48px;font-size:34px;padding:0;text-align:right;-webkit-text-stroke-width:6px}
 .lbl.one .u{font-size:32px;-webkit-text-stroke-width:6px}
+#tools .cb{height:42px;font-size:18px}
+#done{height:52px}
+#uiBtn{height:40px}
 </style>
 </head>
 <body>
@@ -330,7 +333,7 @@ html,body{background:#efe6cf}
   <!-- 좌석 화면 (멀티미디어 영상관 / 세미나실 공용) -->
   <div id="hallScreen">
     <div id="panel">
-      <div id="titleRow"><div id="roomTitle"></div><a id="surveyBtn" class="cb" href="https://nysc.tistory.com/" target="_blank" rel="noopener">설문</a></div>
+      <div id="titleRow"><div id="roomTitle"></div></div>
       <div id="orgInfo">
         <div class="k">단체명</div><div id="vName">-</div>
         <div class="cnt"><span class="k">인원수</span><span id="vCount">0명</span></div>
@@ -349,7 +352,7 @@ html,body{background:#efe6cf}
           <div id="tools">
             <button id="addBtn" class="cb">좌석 추가</button><button id="resetBtn" class="cb">초기화</button>
             <button id="btnTop" class="cb">상단 공지</button><button id="btnFull" class="cb">전체 공지</button>
-            <button id="back" class="cb">← 처음으로</button>
+            <button id="back" class="cb">← 처음으로</button><a id="surveyBtn" class="cb" href="https://nysc.tistory.com/" target="_blank" rel="noopener">설문</a>
           </div>
         </div>
       </div>
@@ -617,7 +620,7 @@ html,body{background:#efe6cf}
   var hdr=document.getElementById('hdr'), roomTitle=document.getElementById('roomTitle');
   function enterRoom(key){
     if(current!==key) buildRoom(key);
-    roomTitle.textContent=cfg.title.replace(/\n/g,' ');
+    roomTitle.textContent=cfg.name;
     setup.style.display='none'; hdr.style.display='none'; hallScreen.style.display='block';
     updateInfo();
     showFull(false); applyNotices();
