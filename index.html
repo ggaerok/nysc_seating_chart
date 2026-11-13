@@ -339,7 +339,7 @@ html,body{background:#efe6cf}
         <div class="cnt"><span class="k">인원수</span><span id="vCount">0명</span></div>
       </div>
       <div id="botbox">
-        <button id="uiBtn" class="cb">UI 감추기</button>
+        <button id="uiBtn" class="cb" title="UI 감추기" aria-label="UI 감추기">▲</button>
         <div class="card2" id="zoneCard">
           <h3>STEP 1 · 구역 선택</h3>
           <div id="gbox"></div>
@@ -633,7 +633,7 @@ html,body{background:#efe6cf}
   uiBtn.onclick=function(){
     var h=document.getElementById('botbox').classList.toggle('uihide');
     document.getElementById('fullBox').classList.toggle('uihide',h);   // 전체 공지의 글자 편집 버튼도 함께 숨김/표시
-    uiBtn.textContent=h?'UI 보이기':'UI 감추기';
+    uiBtn.textContent=h?'▼':'▲'; uiBtn.title=uiBtn.ariaLabel=h?'UI 보이기':'UI 감추기';
     if(h){ active=0; pending=new Set(); addMode=false; tip.style.display='none'; render(); }
   };
   document.getElementById('back').onclick=function(){
