@@ -285,6 +285,23 @@ html,body{background:#efe6cf}
 #fbHide{background:#d1495b !important;border-color:#d1495b !important;color:#fff !important}
 #toast{background:rgba(74,63,42,.92)}
 #fullBox.uihide #fbBar .grp{visibility:hidden}
+
+/* 팀명·인원: 구역 위 직접 글씨 (흰 글자 + 구역색 외곽선) */
+.lbl{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important;color:#fff}
+.lbl input,.lbl .u{color:#fff!important;-webkit-text-stroke:9px var(--zc);paint-order:stroke fill;text-shadow:0 3px 0 rgba(0,0,0,.22)}
+.lbl input::placeholder{color:rgba(255,255,255,.75);-webkit-text-stroke:9px var(--zc)}
+.lbl .cap{display:none!important}
+.lbl .hd{border:0!important}
+.lbl.two{width:300px;height:116px}
+.lbl.two .hd input{font-size:46px;-webkit-text-stroke-width:8px}
+.lbl.two .r2{flex:0 0 52px;gap:0;justify-content:center}
+.lbl.two .tc{width:74px;height:50px;font-size:40px;padding:0;text-align:right;-webkit-text-stroke-width:7px}
+.lbl.two .u{font-size:38px;-webkit-text-stroke-width:7px;padding-left:4px}
+.lbl.one{width:380px;height:58px}
+.lbl.one .hd input{font-size:36px;-webkit-text-stroke-width:7px}
+.lbl.one .r2{padding:0 4px}
+.lbl.one .tc{width:70px;height:48px;font-size:34px;padding:0;text-align:right;-webkit-text-stroke-width:6px}
+.lbl.one .u{font-size:32px;-webkit-text-stroke-width:6px}
 </style>
 </head>
 <body>
@@ -738,7 +755,7 @@ html,body{background:#efe6cf}
 
   /* ---------- 팀명·인원 창 ---------- */
   function makeLabel(n){
-    var d=document.createElement('div'); d.className='lbl two'; d.style.borderColor=COLORS[n];
+    var d=document.createElement('div'); d.className='lbl two'; d.style.setProperty('--zc',COLORS[n]);
     d.innerHTML='<div class="hd"><input class="tn" type="text" placeholder="팀 이름"></div>'+
                 '<div class="r2"><span class="cap">인원</span><input class="tc" type="number" min="0" placeholder="0"><span class="u">명</span></div>';
     d.addEventListener('pointerdown',function(e){e.stopPropagation();});
