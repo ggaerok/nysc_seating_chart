@@ -318,6 +318,13 @@ html,body{background:#efe6cf}
 #botbox{flex:1;min-height:0}
 #f11Box{flex:1;min-height:0;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;line-height:1.4;color:#8a7d60;padding:6px 8px}
 .card{top:70px!important}
+#tpHead{display:flex;align-items:center;gap:18px}
+#tpPresets{display:flex;gap:8px}
+#tpPresets button{height:40px;padding:0 20px;font-size:19px;font-weight:800;font-family:inherit;color:#4a3f2a;background:#ffe9a0;border:3px solid #fff;border-radius:22px;box-shadow:0 0 0 2px #d9cdb2,0 3px 5px rgba(0,0,0,.2);cursor:pointer}
+#tpPresets button:hover{transform:translateY(-1px)}
+#tpPresets button:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
+#fbPresets button{height:44px;padding:0 22px;font-size:20px;font-weight:800;font-family:inherit;color:#4a3f2a;background:#ffe9a0;border:3px solid #fff;border-radius:24px;box-shadow:0 0 0 2px #d9cdb2,0 3px 5px rgba(0,0,0,.2);cursor:pointer}
+#fbPresets button:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
 </style>
 </head>
 <body>
@@ -380,6 +387,7 @@ html,body{background:#efe6cf}
         <div class="grp"><span class="lab">크기</span><button id="fbMinus">−</button><span id="fbSize">48</span><button id="fbPlus">+</button></div>
         <div class="grp"><span class="lab">색상</span><span id="fbColors" class="grp"></span></div>
         <div class="grp"><span class="lab">정렬</span><button data-al="left">왼쪽</button><button data-al="center">가운데</button><button data-al="right">오른쪽</button></div>
+        <div class="grp" id="fbPresets"><button type="button" data-fp="out">퇴소</button></div>
         <button id="fbHide">공지 숨기기</button>
       </div>
       <div id="fbText" contenteditable="true" data-ph="전체 공지 내용을 입력하세요" spellcheck="false"></div>
@@ -390,7 +398,7 @@ html,body{background:#efe6cf}
   <!-- 상단 공지 입력 팝업 -->
   <div id="topPop" style="position:absolute;left:0;top:0;width:1920px;height:1080px;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:100">
     <div class="box" id="tpBox" style="background:#fff;border-radius:16px;padding:32px 36px;box-shadow:0 12px 40px rgba(0,0,0,.35)">
-      <h4>상단 공지 입력</h4>
+      <h4 id="tpHead">상단 공지 입력 <span id="tpPresets"><button type="button" data-ps="in">입소</button><button type="button" data-ps="out">퇴소</button><button type="button" data-ps="act">활동</button></span></h4>
       <div id="tpBar">
         <div class="grp"><span class="lab">크기</span><button id="tpMinus">−</button><span id="tpSize">40</span><button id="tpPlus">+</button></div>
         <div class="grp"><span class="lab">색상</span><span id="tpColors" class="grp"></span></div>
@@ -1094,6 +1102,20 @@ html,body{background:#efe6cf}
     onChange:function(h){ nt().html=h; saveNotices(); }});
   document.getElementById('btnFull').onclick=function(){ showFull(true); };
   document.getElementById('fbHide').onclick=function(){ showFull(false); };
+  // 전체 공지 예시 버튼 (모든 장소 공통): 누르면 예시 공지가 채워지고 가운데 정렬됨
+  var R1='#d32f2f', B1='#1565c0';
+  var FP_PRESETS={out:
+    '<div style="font-size:72px;font-weight:800">💊 <span style="font-size:108px;color:'+R1+'">멀미약</span>은 식사 전에 꼭 먹습니다.</div>'+
+    '<div style="font-size:72px;font-weight:800;margin-top:44px">🚻 <span style="font-size:108px;color:'+R1+'">화장실</span> 꼭 다녀오세요.</div>'+
+    '<div style="font-size:44px;font-weight:700;color:#555">(가장 가까운 휴게소까지 1시간 30분)</div>'+
+    '<div style="font-size:72px;font-weight:800;margin-top:44px">🚌 버스가 준비되면 <span style="color:'+B1+'">바로 출발</span>합니다.</div>'+
+    '<div style="font-size:72px;font-weight:800">💺 자리에 앉아서 대기합니다.</div>'};
+  document.querySelectorAll('#fbPresets [data-fp]').forEach(function(b){
+    b.onclick=function(){
+      fbText.innerHTML=FP_PRESETS[b.getAttribute('data-fp')];
+      nt().html=fbText.innerHTML; nt().align='center'; saveNotices(); applyFull();
+    };
+  });
   document.querySelectorAll('#fbBar [data-al]').forEach(function(b){
     b.onclick=function(){ nt().align=b.getAttribute('data-al'); saveNotices(); applyFull(); };
   });
@@ -1112,6 +1134,11 @@ html,body{background:#efe6cf}
   document.getElementById('btnTop').onclick=function(){
     tpText.innerHTML=nt().topHtml||''; setTpAlign(nt().topAlign||'center'); topPop.style.display='flex'; tpText.focus(); topRich.showState();
   };
+  // 자주 쓰는 문장 버튼 (모든 장소 공통): 누르면 입력칸에 문장이 채워짐
+  var TP_PRESETS={in:'앞에서부터 빈자리 없이 채워 앉아 주세요.',out:'숙소에 두고 온 물건이 있으면 지금 다녀오세요.',act:'같은 숙소를 사용하는 친구들끼리 모여 앉아 주세요.'};
+  document.querySelectorAll('#tpPresets [data-ps]').forEach(function(b){
+    b.onclick=function(){ tpText.innerHTML='<span style="color:'+NCOL[1]+'"></span>'; tpText.firstChild.textContent=TP_PRESETS[b.getAttribute('data-ps')];  /* 예시 문장은 항상 붉은색으로 시작 */ tpText.focus(); topRich.showState(); };
+  });
   document.getElementById('tpNo').onclick=function(){ topPop.style.display='none'; };
   document.getElementById('tpDel').onclick=function(){ tpText.innerHTML=''; tpText.focus(); topRich.showState(); };
   document.getElementById('tpOk').onclick=function(){
