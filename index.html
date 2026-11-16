@@ -115,7 +115,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#dfe5ec;font-family:
 
 /* 좌석 화면 */
 #hallScreen{position:absolute;left:0;top:0;width:1920px;height:1080px;display:none}
-#panel{position:absolute;left:24px;top:12px;width:264px;height:1056px;display:flex;flex-direction:column;gap:8px}
+#panel{position:absolute;left:24px;top:12px;width:264px;height:953px;display:flex;flex-direction:column;gap:8px}
 #titleRow{display:flex;gap:8px;align-items:stretch}
 #surveyBtn{display:flex;align-items:center;justify-content:center;background:#e9d5ff;color:#6b21a8;font-size:21px;text-decoration:none;letter-spacing:1px;box-sizing:border-box}
 #roomTitle{flex:1;min-width:0;white-space:nowrap;background:#c7d2fe;color:#3730a3;border:3px solid #7c88a3;border-radius:8px;padding:9px 16px;font-size:22px;font-weight:800;line-height:1.3;letter-spacing:1px}
@@ -299,11 +299,11 @@ html,body{background:#efe6cf}
 .lbl .u{padding-left:0!important}
 .lbl input::placeholder{color:rgba(0,0,0,.35);-webkit-text-stroke:.3em #fff}
 .lbl .cap{display:none!important}
-#tools .cb{height:50px;font-size:17px}
+#tools .cb{height:46px;font-size:17px}
 #tools{gap:8px}
-#done{height:64px;font-size:24px;letter-spacing:2px}
+#done{height:58px;font-size:24px;letter-spacing:2px}
 #uiBtn{height:46px;font-size:22px}
-#gbox{grid-auto-rows:62px}
+#gbox{grid-auto-rows:58px}
 .gb{width:54px;height:54px;font-size:24px}
 .gb .ck{width:18px;height:18px;line-height:14px;font-size:12px;right:-4px;top:-5px}
 #roomTitle{font-size:25px!important;padding:12px 8px!important}
@@ -315,6 +315,8 @@ html,body{background:#efe6cf}
 #botbox{gap:10px}
 .card2{gap:8px;padding:8px 10px 12px}
 .card2 h3{font-size:14px}
+#botbox{flex:1;min-height:0}
+#f11Box{flex:1;min-height:0;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;line-height:1.4;color:#8a7d60;padding:6px 8px}
 .card{top:70px!important}
 </style>
 </head>
@@ -366,6 +368,7 @@ html,body{background:#efe6cf}
             <button id="back" class="cb">← 처음으로</button><a id="surveyBtn" class="cb" href="https://nysc.tistory.com/" target="_blank" rel="noopener">설문</a>
           </div>
         </div>
+        <div class="card2" id="f11Box"><span>F11을 눌러<br>전체화면으로<br>사용하세요.</span></div>
       </div>
     </div>
     <div id="hall">
