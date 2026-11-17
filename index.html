@@ -646,6 +646,8 @@ html,body{background:#efe6cf}
 
   /* ---------- 방 만들기 ---------- */
   function buildRoom(key){
+    if(current && restored) saveNow();
+    restored=false;
     cfg=ROOMS[key]; current=key;
     S=cfg.S; CG=cfg.CG; SG=cfg.SG; RG=cfg.RG; AW=cfg.AW; ROW_TOP=cfg.ROW_TOP; PER=cfg.per;
     CWd=cfg.CW||cfg.S; SW=PER*CWd+(PER-1)*CG; SP=SW+SG; RP=S+RG;
@@ -711,6 +713,7 @@ html,body{background:#efe6cf}
     if(current!==key) buildRoom(key);
     roomTitle.textContent=cfg.name;
     setup.style.display='none'; hdr.style.display='none'; hallScreen.style.display='block';
+    if(!restored) restoreRoom(key);
     updateInfo();
     showFull(false); applyNotices();
     fitName();
@@ -769,8 +772,8 @@ html,body{background:#efe6cf}
     render();
   };
   resetBtn.onclick=function(){
-    askConfirm('모든 구역과 추가한 의자, 상단·전체 공지를 지우고,\n단체명·인원수 입력 후 장소를 선택한 처음 상태로 되돌릴까요?', function(){
-      resetNotices();
+    askConfirm('모든 장소의 구역·추가한 의자·팀명·인원, 상단·전체 공지와\n단체명·인원수를 모두 지우고 처음 상태로 되돌릴까요?', function(){
+      resetAll();
       for(var g in groups){ groups[g].label.el.remove(); }   // 구역 테두리·팀명·인원 창 삭제
       groups={}; autoAdded=[]; moved={};
       initSeats();                                            // 기본 의자만 남김
@@ -853,7 +856,7 @@ html,body{background:#efe6cf}
     d.innerHTML='<div class="hd"><input class="tn" type="text" placeholder="팀 이름"></div>'+
                 '<div class="r2"><input class="tc" type="number" min="0" placeholder="0"><span class="u">명</span></div>';
     d.addEventListener('pointerdown',function(e){e.stopPropagation();});
-    d.addEventListener('input',function(){ sizeLabel(n); });
+    d.addEventListener('input',function(){ sizeLabel(n); schedSave(); });
     hall.appendChild(d);
     return {el:d};
   }
@@ -1286,8 +1289,53 @@ html,body{background:#efe6cf}
   function resetNotices(){ delete notices[current]; saveNotices(); showFull(false); applyNotices(); }
 
 
-  orgName.addEventListener('input',updateInfo);
-  orgCount.addEventListener('input',updateInfo);
+  /* ---------- 입력 내용 자동 저장 (이 컴퓨터의 localStorage, 초기화 때만 삭제) ---------- */
+  var SKEY='seatChartState_v1', restored=false, saveT=null;
+  function readState(){ try{ return JSON.parse(localStorage.getItem(SKEY)||'{}')||{}; }catch(e){ return {}; } }
+  function snapshot(){
+    var t={}, gs={}, g;
+    slotList.forEach(function(sl){ if(sl.type && sl.type!=='fixed') t[sl.id]=sl.type; });
+    for(g in groups){
+      var d=groups[g].label.el;
+      gs[g]={seats:Array.from(groups[g].seats), name:d.querySelector('.tn').value, count:d.querySelector('.tc').value};
+    }
+    return {t:t, g:gs, a:autoAdded.map(function(sl){ return sl.id; }), m:moved};
+  }
+  function saveNow(){
+    clearTimeout(saveT); saveT=null;
+    var st=readState(); st.org={name:orgName.value, count:orgCount.value};
+    if(restored && current){ st.rooms=st.rooms||{}; st.rooms[current]=snapshot(); }
+    try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){}
+  }
+  function schedSave(){ clearTimeout(saveT); saveT=setTimeout(saveNow,150); }
+  function restoreRoom(key){
+    restored=true;
+    var r=(readState().rooms||{})[key]; if(!r) return;
+    for(var id in (r.t||{})){ if(slots[id]) setSlotType(slots[id],r.t[id]); }
+    autoAdded=(r.a||[]).map(function(id){ return slots[id]; }).filter(Boolean);
+    moved=r.m||{};
+    var byId={}; seatList.forEach(function(c){ byId[c.id]=c; });
+    for(var n in (r.g||{})){
+      var seats=r.g[n].seats.filter(function(id){ return byId[id] && byId[id].type; });
+      if(!seats.length) continue;
+      var lb=makeLabel(+n), d=lb.el;
+      d.querySelector('.tn').value=r.g[n].name||''; d.querySelector('.tc').value=r.g[n].count||'';
+      groups[n]={seats:new Set(seats),label:lb};
+      fitLabel(+n);
+    }
+    render(); updateInfo();
+  }
+  function resetAll(){
+    notices={}; saveNotices(); showFull(false); applyNotices();
+    clearTimeout(saveT); saveT=null;
+    try{ localStorage.removeItem(SKEY); }catch(e){}
+    orgName.value=''; orgCount.value='';
+  }
+  var _render=render; render=function(){ _render.apply(this,arguments); schedSave(); };
+  window.addEventListener('pagehide',saveNow);
+  orgName.addEventListener('input',function(){ updateInfo(); schedSave(); });
+  orgCount.addEventListener('input',function(){ updateInfo(); schedSave(); });
+  (function(){ var o=readState().org; if(o){ orgName.value=o.name||''; orgCount.value=o.count||''; } })();
   buildRoom('media');
 })();
 </script>
