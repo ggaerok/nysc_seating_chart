@@ -299,11 +299,11 @@ html,body{background:#efe6cf}
 .lbl .u{padding-left:0!important}
 .lbl input::placeholder{color:rgba(0,0,0,.35);-webkit-text-stroke:.3em #fff}
 .lbl .cap{display:none!important}
-#tools .cb{height:46px;font-size:17px}
+#tools .cb{height:40px;font-size:17px}
 #tools{gap:8px}
-#done{height:58px;font-size:24px;letter-spacing:2px}
-#uiBtn{height:46px;font-size:22px}
-#gbox{grid-auto-rows:58px}
+#done{height:50px;font-size:24px;letter-spacing:2px}
+#uiBtn{height:38px;font-size:20px}
+#gbox{grid-auto-rows:56px}
 .gb{width:54px;height:54px;font-size:24px}
 .gb .ck{width:18px;height:18px;line-height:14px;font-size:12px;right:-4px;top:-5px}
 #roomTitle{font-size:25px!important;padding:12px 8px!important}
@@ -316,7 +316,7 @@ html,body{background:#efe6cf}
 .card2{gap:8px;padding:8px 10px 12px}
 .card2 h3{font-size:14px}
 #botbox{flex:1;min-height:0}
-#f11Box{flex:1;min-height:0;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;line-height:1.4;color:#8a7d60;padding:6px 8px}
+#f11Box{flex:1;min-height:0;align-items:center;justify-content:center;text-align:center;font-size:15px;font-weight:800;line-height:1.4;color:#8a7d60;padding:4px 6px}
 .card{top:70px!important}
 #tpHead{display:flex;align-items:center;gap:18px}
 #tpPresets{display:flex;gap:8px}
@@ -325,6 +325,13 @@ html,body{background:#efe6cf}
 #tpPresets button:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
 #fbPresets button{height:44px;padding:0 22px;font-size:20px;font-weight:800;font-family:inherit;color:#4a3f2a;background:#ffe9a0;border:3px solid #fff;border-radius:24px;box-shadow:0 0 0 2px #d9cdb2,0 3px 5px rgba(0,0,0,.2);cursor:pointer}
 #fbPresets button:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
+#autoRow{display:flex;flex-direction:column;gap:5px;margin-top:0;padding-top:5px;border-top:2px dashed #e0d5b8}
+#autoRow .alab{font-size:13px;font-weight:800;color:#8a7d60;line-height:1.1}
+#autoBtns{display:flex;gap:7px;flex:1;justify-content:flex-start}
+#autoBtns .ab{width:40px;height:38px;padding:0;border:3px solid #fff;border-radius:14px;background:#ffe9a0;color:#4a3f2a;font-family:inherit;font-size:21px;font-weight:800;cursor:pointer;box-shadow:0 0 0 2px #d9cdb2,0 3px 5px rgba(0,0,0,.2)}
+#autoBtns .ab:hover{background:#ffd35e;transform:translateY(-1px)}
+#autoBtns .ab:active{transform:translateY(2px);box-shadow:0 0 0 2px #d9cdb2}
+#autoBtns .soon{font-size:13px;font-weight:700;color:#a3977c}
 </style>
 </head>
 <body>
@@ -363,6 +370,7 @@ html,body{background:#efe6cf}
         <div class="card2" id="zoneCard">
           <h3>STEP 1 · 구역 선택</h3>
           <div id="gbox"></div>
+          <div id="autoRow"><span class="alab">팀 수 자동선택</span><span id="autoBtns"></span></div>
         </div>
         <div class="card2" id="doneCard">
           <h3>STEP 2 · 확정</h3>
@@ -375,7 +383,7 @@ html,body{background:#efe6cf}
             <button id="back" class="cb">← 처음으로</button><a id="surveyBtn" class="cb" href="https://nysc.tistory.com/" target="_blank" rel="noopener">설문</a>
           </div>
         </div>
-        <div class="card2" id="f11Box"><span>F11을 눌러<br>전체화면으로<br>사용하세요.</span></div>
+        <div class="card2" id="f11Box"><span>F11을 눌러 전체화면으로<br>사용하세요.</span></div>
       </div>
     </div>
     <div id="hall">
@@ -520,6 +528,28 @@ html,body{background:#efe6cf}
         if(s.k>0){ var p=slotAt(s.row,s.side,s.k-1); if(p && p.type) return true; }   // 열의 바깥쪽 옆자리
         return false;
       },
+      // 자동선택: 팀 수 → 구역(ㄱ,ㄴ,...) 좌석 조건. L/R=통로 기준 좌/우, k=통로에서 바깥쪽으로 0부터
+      autoCounts:[2,3,4,5,6],
+      autoZones:function(n){
+        function L(c){ return c.slot.side==='L'; } function Rr(c){ return c.slot.side==='R'; }
+        function rows(a,b){ return function(c){ return c.row>=a && c.row<=b; }; }
+        function and(){ var f=arguments; return function(c){ for(var i=0;i<f.length;i++) if(!f[i](c)) return false; return true; }; }
+        function or(){ var f=arguments; return function(c){ for(var i=0;i<f.length;i++) if(f[i](c)) return true; return false; }; }
+        function outer6(c){ return c.slot.k>=3; }     // 3열의 바깥쪽 6개(9개 중 통로에서 먼 6개)
+        function inner3(c){ return c.slot.k<3; }
+        if(n===2) return [L,Rr];
+        if(n===3) return [and(L,rows(1,4)),and(Rr,rows(1,4)),rows(5,8)];
+        if(n===4) return [and(L,rows(1,4)),and(Rr,rows(1,4)),and(L,rows(5,8)),and(Rr,rows(5,8))];
+        if(n===5) return [and(L,rows(1,3)),and(Rr,rows(1,3)),and(L,rows(4,6)),and(Rr,rows(4,6)),rows(7,8)];
+        if(n===6){
+          var top=function(S){ return or(and(S,rows(1,2)),and(S,rows(3,3),outer6)); };
+          var mid=function(S){ return or(and(S,rows(3,3),inner3),and(S,rows(4,5))); };
+          var bot=function(S){ return and(S,rows(6,8)); };
+          return [top(L),top(Rr),mid(L),mid(Rr),bot(L),bot(Rr)];
+        }
+        return [];
+      },
+      autoExtra:function(n){ return n===6 ? ['r8R0','r8R1'] : []; },   // 6팀: 8열 통로 쪽 검은 의자 2개 추가
       canDelete:function(){ return true; },
       addMsg:'점선 자리를 클릭하면 의자 추가, 추가한 의자를 클릭하면 삭제됩니다',
       helpAdd:'점선 자리 클릭 → 의자 추가,<br>추가한 의자 클릭 → 삭제',
@@ -566,6 +596,25 @@ html,body{background:#efe6cf}
       },
       addMsg:'점선 자리를 클릭하면 의자 2개+책상이 추가, 추가한 의자를 클릭하면 삭제됩니다',
       helpAdd:'점선 자리 클릭 → 의자 2개(+책상) 추가,<br>추가한 의자 클릭 → 2개 삭제',
+      // 자동선택(2·3·4팀). 의자 2개=1세트, k=통로에서 바깥쪽으로 0부터
+      autoCounts:[2,3,4],
+      autoZones:function(n){
+        function L(c){ return c.slot.side==='L'; } function Rr(c){ return c.slot.side==='R'; }
+        function rows(a,b){ return function(c){ return c.row>=a && c.row<=b; }; }
+        function and(){ var f=arguments; return function(c){ for(var i=0;i<f.length;i++) if(!f[i](c)) return false; return true; }; }
+        function or(){ var f=arguments; return function(c){ for(var i=0;i<f.length;i++) if(f[i](c)) return true; return false; }; }
+        function outer(c){ return c.slot.k>=1; }     // 4열 바깥쪽 4칸(의자 4개 = 바깥 2세트)
+        function inner(c){ return c.slot.k<1; }
+        if(n===2) return [L,Rr];
+        if(n===3) return [and(L,rows(1,4)),and(Rr,rows(1,4)),rows(5,99)];
+        if(n===4){
+          var top=function(S){ return or(and(S,rows(1,3)),and(S,rows(4,4),outer)); };
+          var rest=function(S){ return or(and(S,rows(4,4),inner),and(S,rows(5,99))); };
+          return [top(L),rest(L),top(Rr),rest(Rr)];
+        }
+        return [];
+      },
+      autoExtra:function(){ return []; },
       decor:pairRoomDecor(false)   // 스크린: 오른쪽 사선
     }
   };
@@ -576,6 +625,22 @@ html,body{background:#efe6cf}
     nRows:10, maxK:2,                      // 4|4 x 8줄 + 뒤쪽 추가 2줄(9~10열)
     S:46, RG:22, ROW_TOP:76, k:46/58,      // 10줄이 들어가도록 의자 세로·줄 간격만 조금 줄임
     rows:[[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2],[2,2]],
+    // 자동선택(2·3·4팀). 3팀은 9열, 4팀은 9·10열 의자(양쪽 2세트씩)를 자동으로 추가
+    autoCounts:[2,3,4],
+    autoZones:function(n){
+      function L(c){ return c.slot.side==='L'; } function Rr(c){ return c.slot.side==='R'; }
+      function rows(a,b){ return function(c){ return c.row>=a && c.row<=b; }; }
+      function and(){ var f=arguments; return function(c){ for(var i=0;i<f.length;i++) if(!f[i](c)) return false; return true; }; }
+      if(n===2) return [L,Rr];
+      if(n===3) return [and(L,rows(1,6)),and(Rr,rows(1,6)),rows(7,99)];
+      if(n===4) return [and(L,rows(1,5)),and(Rr,rows(1,5)),and(L,rows(6,99)),and(Rr,rows(6,99))];
+      return [];
+    },
+    autoExtra:function(n){
+      var ids=[], rowsAdd=n===3?[9]:(n===4?[9,10]:[]);
+      rowsAdd.forEach(function(r){ ['L','R'].forEach(function(sd){ for(var k=0;k<2;k++) ids.push('r'+r+sd+k); }); });
+      return ids;
+    },
     decor:pairRoomDecor(true)
   });
 
@@ -623,6 +688,8 @@ html,body{background:#efe6cf}
       })(row);
     }
     initSeats();
+    autoAdded=[]; moved={};
+    buildAutoBtns();
     render(); updateInfo();
   }
 
@@ -705,7 +772,7 @@ html,body{background:#efe6cf}
     askConfirm('모든 구역과 추가한 의자, 상단·전체 공지를 지우고,\n단체명·인원수 입력 후 장소를 선택한 처음 상태로 되돌릴까요?', function(){
       resetNotices();
       for(var g in groups){ groups[g].label.el.remove(); }   // 구역 테두리·팀명·인원 창 삭제
-      groups={};
+      groups={}; autoAdded=[]; moved={};
       initSeats();                                            // 기본 의자만 남김
       active=0; pending=new Set(); addMode=false; drag=null;
       marq.style.display='none'; tip.style.display='none';
@@ -880,6 +947,72 @@ html,body{background:#efe6cf}
     render(); updateInfo();
   };
 
+  /* ---------- 팀 수 자동선택 ---------- */
+  var autoAdded=[];      // 자동선택이 추가한 의자(다음 자동선택 때 제거)
+  var autoBtns=document.getElementById('autoBtns'), autoRow=document.getElementById('autoRow');
+  function buildAutoBtns(){
+    autoBtns.innerHTML='';
+    var list=cfg.autoCounts||[];
+    if(!list.length){ var m=document.createElement('span'); m.className='soon'; m.textContent='이 장소는 준비 중'; autoBtns.appendChild(m); return; }
+    list.forEach(function(n){
+      var b=document.createElement('button'); b.type='button'; b.className='ab'; b.textContent=n; b.title=n+'팀 자동선택';
+      b.onclick=function(){ applyAuto(n); };
+      autoBtns.appendChild(b);
+    });
+  }
+  function applyAuto(n){
+    var zs=cfg.autoZones(n);
+    // 이전 자동선택 구역·추가 의자 정리
+    for(var g in groups){ groups[g].label.el.remove(); }
+    groups={}; active=0; pending=new Set(); addMode=false; drag=null; marq.style.display='none'; tip.style.display='none';
+    autoAdded.forEach(function(sl){ if(sl.type==='black') setSlotType(sl,null); });
+    autoAdded=[]; moved={};
+    cfg.autoExtra(n).forEach(function(id){ var sl=slots[id]; if(sl && !sl.type){ setSlotType(sl,'black'); autoAdded.push(sl); } });
+    zs.forEach(function(pred,i){
+      var z=i+1, set=new Set();
+      seatList.forEach(function(c){ if(c.type && pred(c)) set.add(c.id); });
+      if(!set.size) return;
+      groups[z]={seats:set,label:makeLabel(z)};
+      fitLabel(z);
+    });
+    render(); updateInfo();
+    toast(n+'팀 자동선택: 구역 '+zs.length+'개를 선택했습니다');
+  }
+
+  /* ---------- Ctrl+클릭으로 좌석의 구역 변경 / 되돌리기 ---------- */
+  var moved={};   // 좌석id -> {from: 원래 구역}
+  function chairAtPoint(x,y){
+    for(var i=0;i<seatList.length;i++){
+      var c=seatList[i];
+      if(c.type && x>=c.x && x<=c.x+CWd && y>=c.y && y<=c.y+S) return c;
+    }
+    return null;
+  }
+  function moveSeat(id,to){
+    var cur=inAnyGroup(id), origin=moved[id]?moved[id].from:cur;
+    if(cur && groups[cur]){
+      groups[cur].seats.delete(id);
+      if(!groups[cur].seats.size){ groups[cur].label.el.remove(); delete groups[cur]; }
+    }
+    if(!groups[to]) groups[to]={seats:new Set(),label:makeLabel(to)};
+    groups[to].seats.add(id);
+    if(to===origin) delete moved[id]; else moved[id]={from:origin};
+    [cur,to].forEach(function(n){ if(n && groups[n]) fitLabel(n); });
+    if(groups[active]) pending=new Set(groups[active].seats); else pending=new Set();
+    render(); updateInfo(); updateTip();
+  }
+  function ctrlMove(p){
+    var c=chairAtPoint(p.x,p.y); if(!c) return false;
+    var cur=inAnyGroup(c.id);
+    if(cur && cur!==active){                         // 다른 구역 좌석 → 지금 선택한 구역으로
+      moveSeat(c.id,active); toast(NAMES[cur]+' → '+NAMES[active]+' 구역으로 변경 (다시 Ctrl+클릭하면 원래 구역으로)'); return true;
+    }
+    if(cur===active && moved[c.id]){                 // 옮겨 온 좌석 → 원래 구역으로 되돌림
+      var back=moved[c.id].from; moveSeat(c.id,back); toast(NAMES[active]+' → '+NAMES[back]+' 구역으로 되돌렸습니다'); return true;
+    }
+    return false;                                    // 그 외는 기존 Ctrl 선택 동작
+  }
+
   /* ---------- 드래그 선택 / 추가 의자 ---------- */
   var tip=document.getElementById('tip'), drag=null;
   function local(e){
@@ -940,6 +1073,7 @@ html,body{background:#efe6cf}
     e.preventDefault();
     hall.setPointerCapture(e.pointerId);
     var ctrl=e.ctrlKey||e.metaKey, mode='replace';
+    if(ctrl && ctrlMove(p)) return;          // Ctrl+클릭: 다른 구역 좌석을 이 구역으로 옮기기/되돌리기
     if(ctrl){
       var first=Array.from(hitSeats(p.x,p.y,p.x,p.y))[0];
       mode=(first && pending.has(first))?'remove':'add';
